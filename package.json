@@ -1,0 +1,13 @@
+{
+  "name": "git-remote-encrypted",
+  "version": "0.1.0",
+  "repository": "git@github.com:GenerousLabs/git-remote-encrypted.git",
+  "author": "Generous Labs",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "frontend",
+    "server"
+  ]
+}
