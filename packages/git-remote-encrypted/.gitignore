@@ -2,3 +2,6 @@
 .DS_Store
 node_modules
 dist
+
+# Ignore our demo git repo
+repo
