@@ -32,7 +32,7 @@
     "trailingComma": "es5"
   },
   "name": "git-remote-encrypted",
-  "author": "Callum Macdonald",
+  "author": "Generous Labs",
   "module": "dist/git-remote-encrypted.esm.js",
   "size-limit": [
     {
