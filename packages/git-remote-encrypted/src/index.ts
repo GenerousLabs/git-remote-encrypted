@@ -27,13 +27,19 @@ export const start = async () => {
     trees.add(logEntry.commit.tree);
   });
 
-  console.log(
-    'Commits',
-    commits.entries(),
-    'Trees',
-    trees.entries(),
-    '#Nzk9nr'
-  );
+  if (DEBUG)
+    console.log(
+      'Commits',
+      commits.entries(),
+      'Trees',
+      trees.entries(),
+      '#Nzk9nr'
+    );
+
+  await Bluebird.each(commits, async oid => {
+    const object = await git.readObject({ ...params, oid, format: 'wrapped' });
+    console.log('Found object #7bAlBa', object);
+  });
 };
 
 start();
