@@ -1,4 +1,4 @@
-import { uint8ArrayToBase36 } from './utils';
+import { base36ToString, uint8ArrayToBase36 } from './utils';
 
 describe('utils', () => {
   describe('uint8ArrayToBase32()', () => {
@@ -17,6 +17,16 @@ describe('utils', () => {
       ],
     ])('Covnerts a series of known values #GQrFkj', (input, output) => {
       expect(uint8ArrayToBase36(Uint8Array.from(input))).toEqual(output);
+    });
+  });
+
+  describe('base36ToString()', () => {
+    it.each([
+      [[1, 4, 4, 5], '1445'],
+      [[9], '9'],
+      [[36, 1, 15, 18, 22], '101fim'],
+    ])('Converties a series of known values #hVybNp', (input, output) => {
+      expect(base36ToString(input)).toEqual(output);
     });
   });
 });
