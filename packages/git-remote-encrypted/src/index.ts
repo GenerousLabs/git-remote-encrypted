@@ -61,8 +61,11 @@ export const start = async () => {
 
   await Bluebird.each(objectIds, async oid => {
     const object = await git.readObject({ ...params, oid, format: 'wrapped' });
-    const encrypted = encrypt(object.oid, object.object as Uint8Array);
-    await fs.promises.writeFile(path.join(encryptedDir, object.oid), encrypted);
+    const [filename, encrypted] = encrypt(
+      object.oid,
+      object.object as Uint8Array
+    );
+    await fs.promises.writeFile(path.join(encryptedDir, filename), encrypted);
   });
 };
 
