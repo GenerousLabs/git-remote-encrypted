@@ -72,9 +72,12 @@ export const push = async () => {
 
 const pushCommand = program.createCommand('push');
 pushCommand.action(async () => {
-  push();
+  await push();
 });
 
 program.addCommand(pushCommand);
 
-program.parse(process.argv);
+program.parseAsync(process.argv).catch(error => {
+  console.error('program.parseAsync crashed #j1RanY');
+  console.error(error);
+});
