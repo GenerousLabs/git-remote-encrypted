@@ -8,8 +8,8 @@ import { program } from 'commander';
 
 const DEBUG = true;
 
-const dir = path.join(__dirname, '../', 'repo');
-const encryptedDir = path.join(__dirname, '../', 'repo', '.git/encrypted');
+const dir = path.join(process.cwd(), 'repo');
+const encryptedDir = path.join(dir, '.git/encrypted');
 const params = {
   fs,
   http,
