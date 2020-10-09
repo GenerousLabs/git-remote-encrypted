@@ -1951,6 +1951,11 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
 
+base-convert-int-array@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/base-convert-int-array/-/base-convert-int-array-1.0.1.tgz#5b4ddbfa72d2d3b5f75dd86cd32fe3dc8e7e81fe"
+  integrity sha512-NWqzaoXx8L/SS32R+WmKqnQkVXVYl2PwNJ68QV3RAlRRL1uV+yxJT66abXI1cAvqCXQTyXr7/9NN4Af90/zDVw==
+
 base64-js@^1.0.2:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.1.tgz#58ece8cb75dd07e71ed08c736abc5fac4dbf8df1"
