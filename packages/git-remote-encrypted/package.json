@@ -56,6 +56,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "isomorphic-git": "^1.7.8",
+    "remeda": "^0.0.23",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   }
