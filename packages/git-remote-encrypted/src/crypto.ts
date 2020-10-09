@@ -1,6 +1,6 @@
-import { hash, secretbox, randomBytes } from 'tweetnacl';
-import { decodeUTF8, encodeBase64, decodeBase64 } from 'tweetnacl-util';
 import { arrayToHex } from 'enc-utils';
+import { hash, randomBytes, secretbox } from 'tweetnacl';
+import { decodeBase64, decodeUTF8, encodeBase64 } from 'tweetnacl-util';
 
 export type KEYS = {
   secret: Uint8Array;
