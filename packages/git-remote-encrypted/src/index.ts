@@ -1,10 +1,11 @@
 import Bluebird from 'bluebird';
+import { program } from 'commander';
 import fs from 'fs';
-import git, { TREE } from 'isomorphic-git';
+import git, { WrappedObject } from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import path from 'path';
+import { decodeUTF8 } from 'tweetnacl-util';
 import { encrypt } from './crypto';
-import { program } from 'commander';
 
 const DEBUG = true;
 
@@ -16,57 +17,88 @@ const params = {
   dir,
 };
 
+export const writeFile = async (filename: string, content: Uint8Array) => {
+  return fs.promises.writeFile(path.join(encryptedDir, filename), content);
+};
+
+export const walkTree = async (
+  treeObjectId: string,
+  objectIds: Set<string>,
+  walkedTrees: Set<string>
+) => {
+  if (walkedTrees.has(treeObjectId)) {
+    return;
+  }
+
+  const result = await git.readTree({ ...params, oid: treeObjectId });
+
+  // Add this tree to the set of walked trees so we can skip it in future
+  walkedTrees.add(treeObjectId);
+
+  await Bluebird.each(result.tree, async branch => {
+    const { oid, type } = branch;
+    if (type === 'blob') {
+      objectIds.add(oid);
+    } else if (type === 'tree') {
+      await walkTree(oid, objectIds, walkedTrees);
+    } else if (type === 'commit') {
+      throw new Error('Found commit while walking tree #fhvQDB');
+    }
+  });
+};
+
 export const push = async () => {
   if (DEBUG) console.log('dir #AGIM7a', params.dir);
 
-  const objectIds = new Set<string>();
+  // Record which commits have already been saved
+  const commits = new Set<string>();
   const trees = new Set<string>();
+  const blobIds = new Set<string>();
+  const walkedTrees = new Set<string>();
 
   const log = await git.log({ ...params });
 
-  if (DEBUG) console.log('Log #T71dMA', log);
+  if (DEBUG) console.log('Log #T71dMA', log.length);
 
-  await Bluebird.each(log, logEntry => {
-    objectIds.add(logEntry.oid);
+  await Bluebird.each(log, async logEntry => {
+    const [filename, content] = encrypt(
+      logEntry.oid,
+      decodeUTF8(logEntry.payload)
+    );
+    await writeFile(filename, content);
+    commits.add(logEntry.oid);
     trees.add(logEntry.commit.tree);
   });
 
-  const walkerTrees = await Bluebird.map(trees, treeObjectId =>
-    TREE({ ref: treeObjectId })
-  );
-
-  await git.walk({
-    ...params,
-    trees: walkerTrees,
-    map: async (filename, entries) => {
-      if (entries === null) {
-        return filename;
-      }
-
-      await Bluebird.each(entries, async entry => {
-        objectIds.add(await entry.oid());
-      });
-
-      return filename;
-    },
+  await Bluebird.each(trees, async treeObjectId => {
+    await walkTree(treeObjectId, blobIds, walkedTrees);
   });
 
   if (DEBUG)
     console.log(
-      'Objects',
-      objectIds.entries(),
-      'Trees',
-      trees.entries(),
+      'Blob count',
+      blobIds.size,
+      'Tree count',
+      walkedTrees.size,
+      'Commit count',
+      commits.size,
       '#Nzk9nr'
     );
 
-  await Bluebird.each(objectIds, async oid => {
-    const object = await git.readObject({ ...params, oid, format: 'wrapped' });
-    const [filename, encrypted] = encrypt(
-      object.oid,
-      object.object as Uint8Array
-    );
-    await fs.promises.writeFile(path.join(encryptedDir, filename), encrypted);
+  await Bluebird.each(walkedTrees, async treeId => {
+    const tree = (await git.readObject({
+      ...params,
+      oid: treeId,
+      format: 'deflated',
+    })) as WrappedObject;
+    const [filename, encrypted] = encrypt(treeId, tree.object);
+    await writeFile(filename, encrypted);
+  });
+
+  await Bluebird.each(blobIds, async blobId => {
+    const blob = await git.readBlob({ ...params, oid: blobId });
+    const [filename, encrypted] = encrypt(blobId, blob.blob);
+    await writeFile(filename, encrypted);
   });
 };
 
