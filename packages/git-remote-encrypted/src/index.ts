@@ -4,6 +4,7 @@ import git, { TREE } from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import path from 'path';
 import { encrypt } from './crypto';
+import { program } from 'commander';
 
 const DEBUG = true;
 
@@ -15,7 +16,7 @@ const params = {
   dir,
 };
 
-export const start = async () => {
+export const push = async () => {
   if (DEBUG) console.log('dir #AGIM7a', params.dir);
 
   const objectIds = new Set<string>();
@@ -69,4 +70,11 @@ export const start = async () => {
   });
 };
 
-start();
+const pushCommand = program.createCommand('push');
+pushCommand.action(async () => {
+  push();
+});
+
+program.addCommand(pushCommand);
+
+program.parse(process.argv);
