@@ -71,10 +71,19 @@ export const encrypt = (
   return [filename, content];
 };
 
+// export const decryptFilename = (encryptedFilename: string, keys: KEYS) => {
+//   const encryptedFilenameArray = decodeUTF8(encryptFilename);
+//   const [nonce, box] = split(encryptedFilenameArray, NONCE_LENGTH);
+// };
+
 export const decrypt = (encryptedContent: Uint8Array, keys = DEFAULT_KEYS) => {
   const [nonce, box] = split(encryptedContent, NONCE_LENGTH);
 
-  const wrappedContent = secretbox(box, nonce, keys.secret);
+  const wrappedContent = secretbox.open(box, nonce, keys.secret);
+
+  if (wrappedContent === null) {
+    throw new Error('Failed to decrypt. #hzpdW0');
+  }
 
   return wrappedContent;
 };
