@@ -78,32 +78,6 @@ export const walkTreeForObjectIds = async (
   });
 };
 
-export const walkTree = async (
-  treeObjectId: string,
-  objectIds: Set<string>,
-  walkedTrees: Set<string>
-) => {
-  if (walkedTrees.has(treeObjectId)) {
-    return;
-  }
-
-  const result = await git.readTree({ ...params, oid: treeObjectId });
-
-  // Add this tree to the set of walked trees so we can skip it in future
-  walkedTrees.add(treeObjectId);
-
-  await Bluebird.each(result.tree, async branch => {
-    const { oid, type } = branch;
-    if (type === 'blob') {
-      objectIds.add(oid);
-    } else if (type === 'tree') {
-      await walkTree(oid, objectIds, walkedTrees);
-    } else if (type === 'commit') {
-      throw new Error('Found commit while walking tree #fhvQDB');
-    }
-  });
-};
-
 export const push = async () => {
   if (DEBUG) console.log('dir #AGIM7a', params.dir);
 
