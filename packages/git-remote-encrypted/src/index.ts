@@ -22,7 +22,16 @@ const params = {
   dir,
 };
 
-const wrap = ({ type, object }: { type: string; object: Uint8Array }) => {
+/**
+ * Wrap a git object. Prepend the object with the type, byte length, etc.
+ */
+const wrap = ({
+  type,
+  object,
+}: {
+  type: string;
+  object: Uint8Array | Buffer;
+}) => {
   return Buffer.concat([
     Buffer.from(`${type} ${object.byteLength.toString()}\x00`),
     Buffer.from(object),
