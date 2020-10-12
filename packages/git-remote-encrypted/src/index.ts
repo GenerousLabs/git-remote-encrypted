@@ -113,26 +113,71 @@ export const wrapAndDeflate = async ({
   return deflate(wrap({ type: objectType, object: content }));
 };
 
+const logRefs = log.extend('refs');
+export const getAllRefNames = async () => {
+  const refNames = new Set<string>();
+
+  const localBranches = await git.listBranches({ ...params });
+
+  await Bluebird.each(localBranches, branch => {
+    refNames.add(branch);
+  });
+
+  const remotes = await git.listRemotes({ ...params });
+  if (__DEV__) logRefs('Got remotes #wCV5fh', remotes);
+
+  await Bluebird.each(remotes, async remote => {
+    const branches = await git.listBranches({
+      ...params,
+      remote: remote.remote,
+    });
+    await Bluebird.each(branches, branch => {
+      refNames.add(`${remote.remote}/${branch}`);
+    });
+  });
+
+  const tags = git.listTags({ ...params });
+
+  await Bluebird.each(tags, tag => {
+    refNames.add(tag);
+  });
+
+  if (__DEV__) logRefs('Got refs #NhXU5L', refNames.values());
+
+  return Array.from(refNames.values());
+};
+
 const logPush = log.extend('push');
 export const push = async () => {
   if (__DEV__) logPush('dir #AGIM7a', params.dir);
 
   const objectIds = new Set<string>();
 
-  const log = await git.log({ ...params });
+  const refs = await getAllRefNames();
 
-  if (__DEV__) logPush('Log #T71dMA', log.length);
+  await Bluebird.each(refs, async ref => {
+    const expandedRef = await git.expandRef({ ...params, ref });
+    if (__DEV__) logPush('Succefully expanded ref #cPB6D4', ref, expandedRef);
 
-  await Bluebird.each(log, async logEntry => {
-    const { oid: commitId } = logEntry;
+    const refCommitId = await git.resolveRef({ ...params, ref: expandedRef });
+    if (__DEV__) logPush('Succefully resolved ref #eZGHj0', ref, refCommitId);
 
-    // If we've already seen this node, stop here
-    if (objectIds.has(commitId)) {
-      return;
-    }
-    objectIds.add(commitId);
+    // NOTE: Not all refs
+    const log = await git.log({ ...params, ref: refCommitId });
 
-    await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
+    if (__DEV__) logPush('Log #T71dMA', ref, log.length);
+
+    await Bluebird.each(log, async logEntry => {
+      const { oid: commitId } = logEntry;
+
+      // If we've already seen this node, stop here
+      if (objectIds.has(commitId)) {
+        return;
+      }
+      objectIds.add(commitId);
+
+      await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
+    });
   });
 
   if (__DEV__)
