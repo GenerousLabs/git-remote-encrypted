@@ -136,7 +136,7 @@ export const getAllRefNames = async () => {
     });
   });
 
-  const tags = git.listTags({ ...params });
+  const tags = await git.listTags({ ...params });
 
   await Bluebird.each(tags, tag => {
     refNames.add(tag);
