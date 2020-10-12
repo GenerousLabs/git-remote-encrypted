@@ -68,6 +68,7 @@ export const walkTreeForObjectIds = async (
   if (tree.oid !== treeObjectId) {
     // The tree was "peeled"
     console.error('Tree was peeled #cug3Jm', treeObjectId, tree);
+    throw new Error('Hit a peeled tree #DAyRHq');
   }
 
   await Bluebird.each(tree.tree, entry => {
