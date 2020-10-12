@@ -47,6 +47,7 @@
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.6.0",
     "@types/bluebird": "^3.5.32",
+    "@types/debug": "^4.1.5",
     "@types/pako": "^1.0.1",
     "husky": "^4.3.0",
     "size-limit": "^4.6.0",
@@ -57,10 +58,12 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "commander": "^6.1.0",
+    "debug": "^4.2.0",
     "enc-utils": "^2.2.2",
     "isomorphic-git": "^1.7.8",
     "pako": "^1.0.11",
     "remeda": "^0.0.23",
+    "tiny-invariant": "^1.1.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   }
