@@ -58,6 +58,7 @@ export const walkTreeForObjectIds = async (
   objectIds: Set<string>
 ) => {
   if (objectIds.has(treeObjectId)) {
+    if (__DEV__) logWalk('Skipping repeated tree #vxmCSG', treeObjectId);
     return;
   }
   objectIds.add(treeObjectId);
@@ -126,7 +127,16 @@ export const push = async () => {
     await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
   });
 
-  if (__DEV__) logPush('objectIds #kCmOHd', objectIds.size);
+  if (__DEV__)
+    logPush(
+      'objectIds #kCmOHd',
+      // Convert the values into an array and then join them into a single
+      // string, otherwise the debug output will trim the list to only 100
+      // entries.
+      Array.from(objectIds.values()).join('\n'),
+      // Log this second so it's easier to see below the huge list
+      objectIds.size
+    );
 
   await Bluebird.each(objectIds, async oid => {
     const obj = await git.readObject({
