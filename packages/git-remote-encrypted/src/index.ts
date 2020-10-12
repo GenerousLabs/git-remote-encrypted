@@ -133,10 +133,6 @@ export const push = async () => {
       throw new Error('Result not deflated and not content #zNagK7');
     }
 
-    console.log('Inflating #gKRob2', obj);
-    inflate(obj.object as Uint8Array);
-    console.log('Inflated #2cKDE8');
-
     return encryptAndWriteFile(oid, obj.object as Uint8Array);
   });
 };
