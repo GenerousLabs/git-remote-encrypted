@@ -87,6 +87,20 @@ export const walkTreeForObjectIds = async (
   });
 };
 
+// This is unnecessarily async because the isomorphic-git inflate / deflate code
+// can be async in the browser, so we mirror that here in the hope of
+// maintaining better compatibility if we can get access to isomorphic-git's
+// internal APIs instead of building our own.
+export const wrapAndDeflate = async ({
+  objectType,
+  content,
+}: {
+  objectType: string;
+  content: Uint8Array;
+}) => {
+  return deflate(wrap({ type: objectType, object: content }));
+};
+
 export const push = async () => {
   if (DEBUG) console.log('dir #AGIM7a', params.dir);
 
@@ -123,8 +137,11 @@ export const push = async () => {
     });
 
     if (obj.format === 'content') {
-      const wrapped = wrap({ type: obj.type, object: obj.object });
-      const deflated = deflate(wrapped);
+      const deflated = await wrapAndDeflate({
+        objectType: obj.type,
+        content: obj.object,
+      });
+
       return encryptAndWriteFile(oid, deflated);
     }
 
