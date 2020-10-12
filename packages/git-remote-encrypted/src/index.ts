@@ -71,8 +71,17 @@ export const walkTreeForObjectIds = async (
     throw new Error('Hit a peeled tree #DAyRHq');
   }
 
-  await Bluebird.each(tree.tree, entry => {
+  await Bluebird.each(tree.tree, async entry => {
     const { oid, type } = entry;
+
+    // NOTE: We delegate handling of tree entries to the
+    // `walkTreeForObjectIds()` function, which means that we need to hand over
+    // to it BEFORE we check if this object is already in the list, and so on.
+    // Otherwise we add it to the list here, then pass it to be checked, by
+    // which time it gets skipped.
+    if (type === 'tree') {
+      return walkTreeForObjectIds(oid, objectIds);
+    }
 
     if (objectIds.has(oid)) {
       if (__DEV__)
@@ -85,10 +94,6 @@ export const walkTreeForObjectIds = async (
       return;
     }
     objectIds.add(oid);
-
-    if (type === 'tree') {
-      walkTreeForObjectIds(oid, objectIds);
-    }
   });
 };
 
