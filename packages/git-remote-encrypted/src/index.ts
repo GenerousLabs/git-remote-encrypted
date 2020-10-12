@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird';
 import { program } from 'commander';
+import createDebug from 'debug';
 import fs from 'fs';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
@@ -9,10 +10,11 @@ import { decrypt, encrypt } from './crypto';
 
 /**
  * DO
- * - [ ] Get all objects with format=deflated
+ * - [x] Get all objects with format=deflated
+ * - [ ] Figure out why we're pushing fewer objects
  */
 
-const DEBUG = true;
+const log = createDebug('index');
 
 const dir = process.cwd();
 const encryptedDir = path.join(dir, '.git/encrypted');
@@ -50,6 +52,7 @@ export const encryptAndWriteFile = async (
   await writeFile(filename, content);
 };
 
+const logWalk = log.extend('walk');
 export const walkTreeForObjectIds = async (
   treeObjectId: string,
   objectIds: Set<string>
@@ -70,8 +73,8 @@ export const walkTreeForObjectIds = async (
     const { oid, type } = entry;
 
     if (objectIds.has(oid)) {
-      if (DEBUG && false)
-        console.log(
+      if (__DEV__)
+        logWalk(
           'Skipping tree entry #jvfF8r',
           oid,
           treeObjectId,
@@ -101,14 +104,15 @@ export const wrapAndDeflate = async ({
   return deflate(wrap({ type: objectType, object: content }));
 };
 
+const logPush = log.extend('push');
 export const push = async () => {
-  if (DEBUG) console.log('dir #AGIM7a', params.dir);
+  if (__DEV__) logPush('dir #AGIM7a', params.dir);
 
   const objectIds = new Set<string>();
 
   const log = await git.log({ ...params });
 
-  if (DEBUG) console.log('Log #T71dMA', log.length);
+  if (__DEV__) logPush('Log #T71dMA', log.length);
 
   await Bluebird.each(log, async logEntry => {
     const { oid: commitId } = logEntry;
@@ -122,12 +126,7 @@ export const push = async () => {
     await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
   });
 
-  if (DEBUG)
-    console.log(
-      'objectIds #kCmOHd',
-      objectIds.size,
-      objectIds.has('b7811fac0b53f598ec547142cc2c28fe000e8537')
-    );
+  if (__DEV__) logPush('objectIds #kCmOHd', objectIds.size);
 
   await Bluebird.each(objectIds, async oid => {
     const obj = await git.readObject({
@@ -160,6 +159,7 @@ pushCommand.action(async () => {
 });
 program.addCommand(pushCommand);
 
+const logPull = log.extend('pull');
 export const pull = async () => {
   const files = await fs.promises.readdir(encryptedDir);
 
@@ -167,7 +167,7 @@ export const pull = async () => {
     if (file === '.git') {
       return;
     }
-    if (DEBUG) console.log('Got file #GRFGoJ', file);
+    if (__DEV__) logPull('Got file #GRFGoJ', file);
 
     const contents = await fs.promises.readFile(
       path.join(encryptedDir, file),
@@ -175,11 +175,11 @@ export const pull = async () => {
     );
 
     const decrypted = await decrypt(contents);
-    if (DEBUG) console.log('Decrypted #o4Jmke', decrypted.length, decrypted);
+    if (__DEV__) logPull('Decrypted #o4Jmke', decrypted.length, decrypted);
 
     // NOTE: The `inflate()` call is throwing...
     const inflated = inflate(decrypted);
-    if (DEBUG) console.log('Inflated #Y8qAIG', inflated.length);
+    if (__DEV__) logPull('Inflated #Y8qAIG', inflated.length);
 
     const oid = await git.writeObject({
       ...params,
@@ -187,7 +187,7 @@ export const pull = async () => {
       format: 'wrapped',
     });
 
-    if (DEBUG) console.log('Written object #eeDzNw', oid);
+    if (__DEV__) logPull('Written object #eeDzNw', oid);
   });
 };
 
