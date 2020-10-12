@@ -11,7 +11,9 @@ import { decrypt, encrypt } from './crypto';
 /**
  * DO
  * - [x] Get all objects with format=deflated
- * - [ ] Figure out why we're pushing fewer objects
+ * - [x] Figure out why we're pushing fewer objects
+ * - [ ] Loop over all refs
+ * - [ ] Loop over all tags
  */
 
 const log = createDebug('index');
