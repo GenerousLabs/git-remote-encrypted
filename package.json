@@ -9,5 +9,13 @@
     "packages/*",
     "frontend",
     "server"
-  ]
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn workspaces run lint"
+    }
+  },
+  "devDependencies": {
+    "husky": "^4.3.0"
+  }
 }

@@ -20,11 +20,6 @@
     "analyze": "size-limit --why"
   },
   "peerDependencies": {},
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
   "prettier": {
     "printWidth": 80,
     "semi": true,
@@ -51,7 +46,6 @@
     "@types/pako": "^1.0.1",
     "@types/split": "^1.0.0",
     "@vercel/ncc": "^0.24.1",
-    "husky": "^4.3.0",
     "size-limit": "^4.6.0",
     "tsdx": "^0.14.0",
     "tslib": "^2.0.2",

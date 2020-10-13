@@ -20,11 +20,6 @@
     "analyze": "size-limit --why"
   },
   "peerDependencies": {},
-  "husky": {
-    "hooks": {
-      "pre-commit": "tsdx lint"
-    }
-  },
   "prettier": {
     "printWidth": 80,
     "semi": true,
@@ -46,7 +41,6 @@
   ],
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.6.0",
-    "husky": "^4.3.0",
     "size-limit": "^4.6.0",
     "tsdx": "^0.14.1",
     "tslib": "^2.0.3",
