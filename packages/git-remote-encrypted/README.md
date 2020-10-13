@@ -25,7 +25,7 @@ git add remote encrypted::git@github.com/user/repo.git#main::KEY1:KEY2:KEY3:KEY4
 ### JavaScript (or TypeScript)
 
 ```typescript
-import gitEncrypted from 'git-remote-encrypted';
+import git from 'git-remote-encrypted';
 import fs from 'fs';
 
 // Assuming this is an exisitng git repository
