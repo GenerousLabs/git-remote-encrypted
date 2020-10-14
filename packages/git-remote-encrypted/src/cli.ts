@@ -40,6 +40,11 @@ GitRemoteHelper({
       const existingRefs = await getRefs({ fs, dir });
       const refsString = refsToString({ refs: existingRefs });
 
+      // In the event of an empty string, return just one newline
+      if (refsString.length === 0) {
+        return '\n';
+      }
+
       return `${refsString}\n\n`;
     },
     handleFetch: async ({ refs, dir }) => {
@@ -87,7 +92,7 @@ GitRemoteHelper({
       // Now do the encrypted repo push
       await encryptedRepoAddAndPush({ filenames });
 
-      return response.join('\n') + '\n';
+      return response.join('\n') + '\n\n';
     },
   },
 });
