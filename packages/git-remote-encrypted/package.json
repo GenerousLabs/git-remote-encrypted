@@ -11,8 +11,8 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "concurrently yarn:watch:*",
-    "watch:tsdx": "tsdx watch",
+    "start": "concurrently -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" yarn:watch:*",
+    "watch:tsdx": "tsdx watch --verbose",
     "watch:ncc": "ncc build -e debug -e tslib -w src/cli.ts -o dist/cli/",
     "build": "concurrently yarn:build:*",
     "build:tsdx": "tsdx build",
