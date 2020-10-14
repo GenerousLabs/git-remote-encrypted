@@ -8,6 +8,7 @@ import path from 'path';
 import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { decrypt, encrypt } from './crypto';
 import { packageLog } from './log';
+import { getRefs } from './refs';
 import { FS } from './types';
 import { wrap } from './utils';
 
@@ -297,10 +298,14 @@ export const encryptAndSaveObjects = async ({
  */
 const logPushRef = log.extend('pushRef');
 export const pushRef = async ({
+  fs,
+  dir,
   ignoreObjectIds,
   pushRef,
   stopAtRef,
 }: {
+  fs: FS;
+  dir: string;
   pushRef: string;
   ignoreObjectIds: Set<string>;
   stopAtRef?: string;
@@ -317,7 +322,16 @@ export const pushRef = async ({
   if (__DEV__)
     logPushRef('Succefully resolved ref #TY3tfW', pushRef, refCommitId);
 
-  // NOTE: Not all refs
+  // If we're trying to push, and we are already up to date, then stop here
+  const refs = await getRefs({ fs, dir });
+  if (typeof refs[pushRef] !== 'undefined' && refs[pushRef] === refCommitId) {
+    return {
+      objectIds: new Set<string>(),
+      filenames: new Set<string>(),
+      refCommitId,
+    };
+  }
+
   const log = await git.log({ ...params, ref: refCommitId });
 
   if (__DEV__) logPushRef('Got log #BoPmIA', pushRef, log.length);

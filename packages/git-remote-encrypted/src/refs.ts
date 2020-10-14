@@ -16,7 +16,7 @@ import { DEFAULT_KEYS, ENCRYPTED_DIR, REF_OID } from './constants';
 import { decrypt, encryptFilename, KEYS } from './crypto';
 import { encryptAndWriteFile, wrapAndDeflate } from './encrypted';
 import { packageLog } from './log';
-import { FS } from './types';
+import { GitBaseParams } from './types';
 import { doesFileExist, unwrap } from './utils';
 
 type Ref = {
@@ -60,18 +60,10 @@ export const stringToRefs = ({ refsString }: { refsString: string }): Refs => {
   return refs;
 };
 
-type RefsBaseParmas = {
-  /**
-   * The filesystem instance for isomorphic-git. Can be node's fs, a LightningFS
-   * instance, or otherwise. */
-  fs: FS;
-  /**
-   * The full, absolute, path to the git directory (usually `repo/.git`).
-   */
-  dir: string;
-};
-
-export const getRefs = async ({ fs, dir }: RefsBaseParmas) => {
+export const getRefs = async ({
+  fs,
+  dir,
+}: Pick<GitBaseParams, 'fs' | 'dir'>) => {
   log('getRefs() invoked #g8kmwd', JSON.stringify({ dir }));
 
   const keys = DEFAULT_KEYS;
@@ -107,12 +99,7 @@ export const getRefs = async ({ fs, dir }: RefsBaseParmas) => {
   return refs;
 };
 
-export const writeRefsFile = async ({
-  refsString,
-}: RefsBaseParmas & {
-  keys: KEYS;
-  refsString: string;
-}) => {
+export const writeRefsFile = async ({ refsString }: { refsString: string }) => {
   const filenames = new Set<string>();
 
   const refsArray = decodeUTF8(refsString);
@@ -130,7 +117,12 @@ export const writeRefsFile = async ({
   return filename;
 };
 
-export const setRef = async ({ dir, fs, oid, ref }: RefsBaseParmas & Ref) => {
+export const setRef = async ({
+  dir,
+  fs,
+  oid,
+  ref,
+}: Pick<GitBaseParams, 'dir' | 'fs'> & Ref) => {
   log('setRef() invoked #SULV9G', JSON.stringify({ ref, oid }));
 
   const keys = DEFAULT_KEYS;
@@ -148,7 +140,7 @@ export const setRef = async ({ dir, fs, oid, ref }: RefsBaseParmas & Ref) => {
   const refsString = refsToString({ refs: newRefs });
   log('setRef() refsString #6phgMz', JSON.stringify(refsString));
 
-  await writeRefsFile({ dir, keys, fs, refsString });
+  await writeRefsFile({ refsString });
 
   log('setRef() success #VjowIq', JSON.stringify({ ref, oid }));
 

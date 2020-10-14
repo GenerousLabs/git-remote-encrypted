@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { HttpClient } from 'isomorphic-git';
 
 export type FS = {
   promises: {
@@ -14,4 +15,21 @@ export type FS = {
     symlink?: typeof fs.promises.symlink;
     chmod?: typeof fs.promises.chmod;
   };
+};
+
+export type GitBaseParams = {
+  /**
+   * The filesystem instance for isomorphic-git. Can be node's fs, a LightningFS
+   * instance, or otherwise. */
+  fs: FS;
+  /**
+   * The full, absolute, path to the git directory (usually `repo/.git`).
+   */
+  dir: string;
+  /**
+   * The http client to pass to isomorphic-git. Can from one of these two:
+   * import http from 'isomorphic-git/http/node';
+   * import http from 'isomorphic-git/http/web';
+   */
+  http: HttpClient;
 };

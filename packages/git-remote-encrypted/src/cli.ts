@@ -67,6 +67,8 @@ GitRemoteHelper({
         try {
           // TODO Get better at skipping history here
           const pushRefResponse = await pushRef({
+            fs,
+            dir,
             ignoreObjectIds: existingObjectIds,
             pushRef: ref.src,
           });
