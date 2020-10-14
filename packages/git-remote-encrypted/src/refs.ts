@@ -116,7 +116,7 @@ export const writeRefsFile = async ({
   const filenames = new Set<string>();
 
   const refsArray = decodeUTF8(refsString);
-  log('writeRefsFile() refsArray #aGoHFY', refsArray);
+  logNoisy('writeRefsFile() refsArray #aGoHFY', refsArray);
 
   const deflatedContent = await wrapAndDeflate({
     objectType: 'refs',
