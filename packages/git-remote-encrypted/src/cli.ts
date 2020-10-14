@@ -65,6 +65,7 @@ GitRemoteHelper({
 
       const response = await Bluebird.mapSeries(refs, async ref => {
         try {
+          // TODO Get better at skipping history here
           const pushRefResponse = await pushRef({
             ignoreObjectIds: existingObjectIds,
             pushRef: ref.src,
