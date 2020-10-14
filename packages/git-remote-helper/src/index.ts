@@ -57,18 +57,31 @@ export type Command =
   | CommandPush
   | CommandFetch;
 
-type HandlePush = (params: { refs: PushRef[]; dir: string }) => Promise<string>;
-type HandleFetch = (params: {
-  refs: FetchRef[];
+/**
+ * These are parameters which are passed to every api callback
+ */
+type ApiBaseParmas = {
   dir: string;
-}) => Promise<string>;
+  remoteName: string;
+  remoteUrl: string;
+};
+
+type HandlePush = (
+  params: ApiBaseParmas & { refs: PushRef[] }
+) => Promise<string>;
+type HandleFetch = (
+  params: ApiBaseParmas & {
+    refs: FetchRef[];
+  }
+) => Promise<string>;
 
 type ApiBase = {
-  list: (params: {
-    refs: string[];
-    dir: string;
-    forPush: boolean;
-  }) => Promise<string>;
+  list: (
+    params: ApiBaseParmas & {
+      refs: string[];
+      forPush: boolean;
+    }
+  ) => Promise<string>;
   handlePush?: HandlePush;
   handleFetch?: HandleFetch;
 };
@@ -107,6 +120,8 @@ const GitRemoteHelper = ({
   };
   const dir = path.join(process.cwd(), getDir());
 
+  const [, , remoteName, remoteUrl] = process.argv;
+
   const capabilitiesResponse =
     [GitCommands.option, GitCommands.push, GitCommands.fetch]
       .filter(option => {
@@ -122,7 +137,7 @@ const GitRemoteHelper = ({
       })
       .join('\n') + '\n\n';
 
-  log('Startup #p6i3kB', { dir, capabilitiesResponse });
+  log('Startup #p6i3kB', { dir, remoteName, remoteUrl, capabilitiesResponse });
 
   const commands = inputStream.pipe(
     tap(line => {
@@ -249,7 +264,7 @@ const GitRemoteHelper = ({
       } else if (command.command === GitCommands.list) {
         const { forPush } = command;
         try {
-          return api.list({ refs: [], dir, forPush });
+          return api.list({ refs: [], dir, remoteName, remoteUrl, forPush });
         } catch (error) {
           console.error('api.list threw #R8aJlZ');
           // console.error(error);
@@ -264,7 +279,7 @@ const GitRemoteHelper = ({
         try {
           // NOTE: Without the await here, the promise is returned immediately,
           // and the catch block never fires.
-          return await api.handlePush({ refs, dir });
+          return await api.handlePush({ refs, dir, remoteName, remoteUrl });
         } catch (error) {
           console.error('api.handlePush threw #R8aJlZ');
           // console.error(error);
@@ -278,7 +293,7 @@ const GitRemoteHelper = ({
         try {
           // NOTE: Without the await here, the promise is returned immediately,
           // and the catch block never fires.
-          return await api.handleFetch({ refs, dir });
+          return await api.handleFetch({ refs, dir, remoteName, remoteUrl });
         } catch (error) {
           console.error('api.handleFetch threw #5jxsQQ');
           // console.error(error);
