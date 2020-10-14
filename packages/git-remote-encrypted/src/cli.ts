@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
 import Bluebird from 'bluebird';
-import debug from 'debug';
 import GitRemoteHelper, { PushRef } from 'git-remote-helper';
 import { pushRef } from './encrypted';
+import { packageLog } from './log';
 
 globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
-const log = debug('cli');
+const log = packageLog.extend('cli');
 const logList = log.extend('list');
 const logPush = log.extend('push');
+const logFetch = log.extend('fetch');
 
 GitRemoteHelper({
   env: process.env,

@@ -1,6 +1,5 @@
 import Bluebird from 'bluebird';
 import { program } from 'commander';
-import createDebug from 'debug';
 import fs from 'fs';
 import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
@@ -8,6 +7,7 @@ import { deflate, inflate } from 'pako';
 import path from 'path';
 import { decodeUTF8 } from 'tweetnacl-util';
 import { decrypt, encrypt } from './crypto';
+import { packageLog } from './log';
 
 /**
  * DO
@@ -24,8 +24,8 @@ import { decrypt, encrypt } from './crypto';
 // NOTE: This is the ref of an "empty" repo in regular git
 const REF_OID = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
-const log = createDebug('index');
 
+const log = packageLog.extend('encrypted');
 const dir = process.cwd();
 const encryptedDir = path.join(dir, '.git/encrypted');
 const params = {
