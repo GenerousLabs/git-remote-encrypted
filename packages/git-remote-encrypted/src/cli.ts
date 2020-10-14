@@ -10,7 +10,7 @@
 import Bluebird from 'bluebird';
 import fs from 'fs';
 import GitRemoteHelper, { PushRef } from 'git-remote-helper';
-import { pull, pushRef } from './encrypted';
+import { encryptedRepoAddAndPush, pull, pushRef } from './encrypted';
 import { packageLog } from './log';
 import { getRefs, refsToString, setRef } from './refs';
 
@@ -110,7 +110,7 @@ GitRemoteHelper({
       });
 
       // Now do the encrypted repo push
-      // await encryptedRepoAddAndPush({ filenames });
+      await encryptedRepoAddAndPush({ filenames });
 
       return response.join('\n') + '\n';
     },
