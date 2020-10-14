@@ -21,10 +21,11 @@ const ONE_LINE_COMMANDS = [
 ];
 
 const LOG_NAMESPACE = 'git-remote-helper';
-const log = debug(LOG_NAMESPACE);
-const logInput = debug([LOG_NAMESPACE, 'io', 'input'].join(':'));
-const logOutput = debug([LOG_NAMESPACE, 'io', 'output'].join(':'));
-const logError = debug([LOG_NAMESPACE, 'error'].join(':'));
+const logError = debug(LOG_NAMESPACE);
+const log = logError.extend('noisy');
+const logIo = logError.extend('io');
+const logInput = logIo.extend('input');
+const logOutput = logIo.extend('output');
 
 export type PushRef = { src: string; dst: string; force: boolean };
 
