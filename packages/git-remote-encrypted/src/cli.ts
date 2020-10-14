@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 /**
+ * DO
  * - [ ] Decide how to store refs
  * - [ ] Create a list of only new filenames
  * - [ ] Figure out how to get the upstream encrypted remote
