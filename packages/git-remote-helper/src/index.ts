@@ -101,7 +101,7 @@ const GitRemoteHelper = ({
           throw new Error('Unknown option #GDhBnb');
         }
       })
-      .join(' ') + '\n\n';
+      .join('\n') + '\n\n';
 
   log('Startup #p6i3kB', { dir, capabilitiesResponse });
 
