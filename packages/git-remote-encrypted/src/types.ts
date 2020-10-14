@@ -33,3 +33,17 @@ export type GitBaseParams = {
    */
   http: HttpClient;
 };
+
+export type Push = (
+  params: GitBaseParams & {
+    /**
+     * The remote URL, as it should be passed to git. So already stripped of all
+     * the `encrypted::` prefix and the `#main` branch suffix.
+     */
+    url: string;
+    /**
+     * The remote branch.
+     */
+    branch: string;
+  }
+) => Promise<void>;

@@ -1,3 +1,5 @@
+import { join } from 'path';
+import { ENCRYPTED_DIR } from './constants';
 import { FS } from './types';
 
 const NOT_FOUND_ERROR_CODE = 'ENOENT';
@@ -50,4 +52,8 @@ export const unwrap = (input: Uint8Array | Buffer) => {
     type,
     object: Buffer.from(buffer.slice(i + 1)),
   };
+};
+
+export const gitDirToEncryptedDir = ({ dir }: { dir: string }) => {
+  return join(dir, ENCRYPTED_DIR);
 };

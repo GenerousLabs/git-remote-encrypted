@@ -9,10 +9,13 @@
 
 import Bluebird from 'bluebird';
 import fs from 'fs';
-import GitRemoteHelper, { PushRef } from 'git-remote-helper';
+import GitRemoteHelper from 'git-remote-helper';
+import http from 'isomorphic-git/http/node';
 import { encryptedRepoAddAndPush, pull, pushRef } from './encrypted';
 import { packageLog } from './log';
+import { nodePush } from './nodePush';
 import { getRefs, refsToString, setRef } from './refs';
+import { gitDirToEncryptedDir } from './utils';
 
 globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
@@ -55,8 +58,10 @@ GitRemoteHelper({
       await pull({ fs, dir });
       return '\n';
     },
-    handlePush: async ({ refs, dir }: { dir: string; refs: PushRef[] }) => {
+    handlePush: async ({ refs, dir, remoteUrl }) => {
       logPush('handlePush() invoked #Fl6g38');
+
+      const encryptedDir = gitDirToEncryptedDir({ dir });
 
       const existingObjectIds = new Set<string>();
 
@@ -93,7 +98,13 @@ GitRemoteHelper({
       });
 
       // Now do the encrypted repo push
-      await encryptedRepoAddAndPush({ filenames });
+      await encryptedRepoAddAndPush({
+        fs,
+        encryptedDir,
+        http,
+        remoteUrl,
+        push: nodePush,
+      });
 
       return response.join('\n') + '\n\n';
     },

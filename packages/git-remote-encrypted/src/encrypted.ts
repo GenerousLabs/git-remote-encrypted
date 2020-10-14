@@ -8,8 +8,9 @@ import path from 'path';
 import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { decrypt, encrypt } from './crypto';
 import { packageLog } from './log';
+import { nodePush } from './nodePush';
 import { getRefs } from './refs';
-import { FS } from './types';
+import { FS, GitBaseParams, Push } from './types';
 import { wrap } from './utils';
 
 /**
@@ -383,23 +384,102 @@ export const pushRef = async ({
   return { ...results, refCommitId };
 };
 
-const logE = log.extend('encryptedRepoAddAndPush');
-export const encryptedRepoAddAndPush = async ({
-  filenames,
-}: {
-  filenames: Set<string>;
-}) => {
-  const encryptedParams = { ...params, dir: encryptedDir };
+const logEncryptedRepoPush = log.extend('doEncryptedRepoPush');
+export const doEncryptedRepoPush = async ({
+  fs,
+  http,
+  encryptedDir,
+  remoteUrl,
+  push,
+}: Omit<GitBaseParams, 'dir'> &
+  EncryptedPushParams & {
+    push: Push;
+  }) => {
+  const [url, branch = 'main'] = remoteUrl.split('#');
+  logEncryptedRepoPush(
+    'Pushing encrypted repo to upstream #WpIWTQ',
+    JSON.stringify({ url, branch })
+  );
 
-  // Do all the `git add`s
-  await Bluebird.each(filenames, async filename => {
-    await git.add({ ...encryptedParams, filepath: filename });
+  await push({ dir: encryptedDir, url, branch, fs, http });
+};
+
+type EncryptedPushParams = {
+  /**
+   * The path to the encrypted upstream git repository.
+   */
+  encryptedDir: string;
+  /**
+   * The remote URL provided from the native git client
+   */
+  remoteUrl: string;
+};
+
+const logE = log.extend('encryptedRepoAddAndPush');
+const logENoisy = logE.extend('noisy');
+export const encryptedRepoAddAndPush = async ({
+  fs,
+  http,
+  encryptedDir,
+  remoteUrl,
+}: Omit<GitBaseParams, 'dir'> &
+  EncryptedPushParams & {
+    push: Push;
+  }) => {
+  logE('Invoked #qm8Cu0', JSON.stringify({ encryptedDir, remoteUrl }));
+
+  // In the context of this function, all operations happen on the encrypted
+  // repo, and so we pass `encryptedDir` as the param `dir` in all operations.
+  const dir = encryptedDir;
+
+  const status = await git.statusMatrix({ fs, dir });
+
+  const filesWithChanges = await Bluebird.filter(status, async row => {
+    const [filepath, headStatus, workdirStatus, stageStatus] = row;
+
+    // If all status rows are 1, nothing to do, this file is up to date
+    if (headStatus === 1 && workdirStatus === 1 && stageStatus === 1) {
+      return false;
+    }
+
+    // If this file is not up to date in the index, add it to the index now
+    if (stageStatus !== 2) {
+      logENoisy('Adding file #PzrVZc', JSON.stringify({ filepath }));
+      await git.add({ fs, dir, filepath });
+    }
+
+    return true;
   });
 
+  if (filesWithChanges.length === 0) {
+    logE('No upstream encrypted repo changes. #25zevW');
+    // There are no files with changes, so nothing to do. We still do a push
+    // anyway, in case previous pushes failed for any reason.
+    await doEncryptedRepoPush({
+      fs,
+      http,
+      encryptedDir,
+      remoteUrl,
+      push: nodePush,
+    });
+    return;
+  }
+
   await git.commit({
-    ...encryptedParams,
+    fs,
+    dir,
     author: GIT_ENCRYPTED_AUTHOR,
     message: GIT_ENCRYPTED_MESSAGE,
+  });
+
+  logE('Created new encrypted repo commit #7SOC1A');
+
+  await doEncryptedRepoPush({
+    fs,
+    http,
+    encryptedDir,
+    remoteUrl,
+    push: nodePush,
   });
 
   logE('encryptedRepoAddAndPush() success #jXJ7PD');
