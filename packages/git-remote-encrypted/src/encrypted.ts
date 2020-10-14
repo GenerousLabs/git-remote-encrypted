@@ -24,8 +24,14 @@ import { packageLog } from './log';
 // NOTE: This is the ref of an "empty" repo in regular git
 const REF_OID = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
+const GIT_ENCRYPTED_AUTHOR = {
+  name: 'Encryption',
+} as const;
+const GIT_ENCRYPTED_MESSAGE = 'Encrypted push' as const;
 
 const log = packageLog.extend('encrypted');
+
+// TODO Change these to parameters which are passed in
 const dir = process.cwd();
 const encryptedDir = path.join(dir, '.git/encrypted');
 const params = {
@@ -327,12 +333,7 @@ export const encryptAndSaveObjects = async ({
     });
   });
 
-  // TODO Add and push filenames
-  logPushRef(
-    'filenames #Uj3tVM',
-    Array.from(filenames.values()).join('\n'),
-    filenames.size
-  );
+  return { objectIds, filenames };
 };
 
 /**
@@ -378,5 +379,28 @@ export const pushRef = async ({
     await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
   });
 
-  await encryptAndSaveObjects({ objectIds });
+  return await encryptAndSaveObjects({ objectIds });
+};
+
+const logE = log.extend('encryptedRepoAddAndPush');
+export const encryptedRepoAddAndPush = async ({
+  filenames,
+}: {
+  filenames: Set<string>;
+}) => {
+  const encryptedParams = { ...params, dir: encryptedDir };
+
+  // Do all the `git add`s
+  await Bluebird.each(filenames, async filename => {
+    await git.add({ ...encryptedParams, filepath: filename });
+  });
+
+  await git.commit({
+    ...encryptedParams,
+    author: GIT_ENCRYPTED_AUTHOR,
+    message: GIT_ENCRYPTED_MESSAGE,
+  });
+
+  logE('encryptedRepoAddAndPush() success #jXJ7PD');
+  // TODO Figure out how to do the upstream push here
 };
