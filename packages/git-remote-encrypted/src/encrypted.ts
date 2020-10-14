@@ -324,7 +324,9 @@ export const pushRef = async ({
 
   // If we're trying to push, and we are already up to date, then stop here
   const refs = await getRefs({ fs, dir });
-  if (typeof refs[pushRef] !== 'undefined' && refs[pushRef] === refCommitId) {
+  // If the commit we want to push exists on any of our refs (branches, tags)
+  // then we can safely skip it. That commit has already been pushed.
+  if (Object.values(refs).includes(refCommitId)) {
     return {
       objectIds: new Set<string>(),
       filenames: new Set<string>(),
