@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
+import Bluebird from 'bluebird';
 import debug from 'debug';
 import GitRemoteHelper, { PushRef } from 'git-remote-helper';
+import { pushRef } from './encrypted';
+
+globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
 const log = debug('cli');
 const logList = log.extend('list');
@@ -33,8 +37,22 @@ GitRemoteHelper({
     },
     handlePush: async ({ refs }: { dir: string; refs: PushRef[] }) => {
       logPush('handlePush() invoked #Fl6g38');
-      // Do the actual magic here
-      return refs.map(ref => `ok ${ref.dst}`).join('\n') + '\n\n';
+
+      const existingObjectIds = new Set<string>();
+
+      const response = await Bluebird.mapSeries(refs, async ref => {
+        try {
+          await pushRef({
+            ignoreObjectIds: existingObjectIds,
+            pushRef: ref.src,
+          });
+          return `ok ${ref.dst}`;
+        } catch (error) {
+          return `error ${ref.dst}`;
+        }
+      });
+
+      return response.join('\n') + '\n\n';
     },
   },
 });
