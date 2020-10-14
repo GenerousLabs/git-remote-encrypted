@@ -56,6 +56,7 @@
     "commander": "^6.1.0",
     "debug": "^4.2.0",
     "enc-utils": "^2.2.2",
+    "git-remote-helper": "0.1.0",
     "isomorphic-git": "^1.7.8",
     "pako": "^1.0.11",
     "remeda": "^0.0.23",

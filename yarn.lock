@@ -7527,7 +7527,19 @@ run-queue@^1.0.0, run-queue@^1.0.3:
   dependencies:
     aproba "^1.1.1"
 
-rxjs@^6.6.0:
+rxjs-async-map@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/rxjs-async-map/-/rxjs-async-map-0.2.0.tgz#5af3d069e85983602afb8f2091bc67bcc4306ac6"
+  integrity sha512-HG1Hym+v0HXSZFkgFQmAxnCsraFc5zTjYp7YnCtgoNh+jYf08XpBR3dvi/zvTf17KylhRgmGuVzv/CpEbbWIgw==
+  dependencies:
+    rxjs "^6.3.3"
+
+rxjs-stream@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/rxjs-stream/-/rxjs-stream-3.2.1.tgz#928e356150a917d6f741e2e08339414fdcbd71f1"
+  integrity sha512-SbubqPmtaEU1YZEU3HChFutKCKc4uB3kMykaciP+yH7hoq9UY5zC85OoviCf+woWMngXBUfEziFNRwsh59mgJA==
+
+rxjs@^6.3.3, rxjs@^6.6.0, rxjs@^6.6.3:
   version "6.6.3"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.3.tgz#8ca84635c4daa900c0d3967a6ee7ac60271ee552"
   integrity sha512-trsQc+xYYXZ3urjOiJOuCOa5N3jAZ3eiSpQB5hIT8zGlL2QfnHLJ2r7GMkBGuIausdJN1OneaI6gQlsqNHHmZQ==
