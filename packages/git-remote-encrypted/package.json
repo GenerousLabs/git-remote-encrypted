@@ -11,8 +11,12 @@
     "node": ">=10"
   },
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
+    "start": "concurrently yarn:watch:*",
+    "watch:tsdx": "tsdx watch",
+    "watch:ncc": "ncc build -e debug -e tslib -w src/cli.ts -o dist/cli/",
+    "build": "concurrently yarn:build:*",
+    "build:tsdx": "tsdx build",
+    "build:ncc": "ncc build -e debug -e tslib src/cli.ts -o dist/cli/",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
@@ -46,6 +50,7 @@
     "@types/pako": "^1.0.1",
     "@types/split": "^1.0.0",
     "@vercel/ncc": "^0.24.1",
+    "concurrently": "^5.3.0",
     "size-limit": "^4.6.0",
     "tsdx": "^0.14.0",
     "tslib": "^2.0.2",
