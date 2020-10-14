@@ -236,7 +236,8 @@ const GitRemoteHelper = ({
           return api.list({ refs: [], dir, forPush });
         } catch (error) {
           console.error('api.list threw #R8aJlZ');
-          console.error(error);
+          // console.error(error);
+          throw error;
         }
       } else if (command.command === GitCommands.push) {
         log('Calling api.handlePush() #qpi4Ah');
@@ -245,10 +246,13 @@ const GitRemoteHelper = ({
           throw new Error('api.handlePush undefined #9eNmmz');
         }
         try {
-          return api.handlePush({ refs, dir });
+          // NOTE: Without the await here, the promise is returned immediately,
+          // and the catch block never fires.
+          return await api.handlePush({ refs, dir });
         } catch (error) {
           console.error('api.handlePush threw #R8aJlZ');
-          console.error(error);
+          // console.error(error);
+          throw error;
         }
       } else if (command.command === GitCommands.fetch) {
         const { refs } = command;
@@ -256,10 +260,13 @@ const GitRemoteHelper = ({
           throw new Error('api.handleFetch undefined #9eNmmz');
         }
         try {
-          return api.handleFetch({ refs, dir });
+          // NOTE: Without the await here, the promise is returned immediately,
+          // and the catch block never fires.
+          return await api.handleFetch({ refs, dir });
         } catch (error) {
           console.error('api.handleFetch threw #5jxsQQ');
-          console.error(error);
+          // console.error(error);
+          throw error;
         }
       }
 
