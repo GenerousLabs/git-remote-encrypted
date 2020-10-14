@@ -28,6 +28,7 @@ const logInput = logIo.extend('input');
 const logOutput = logIo.extend('output');
 
 export type PushRef = { src: string; dst: string; force: boolean };
+export type FetchRef = { ref: string; oid: string };
 
 type CommandCapabilities = {
   command: GitCommands.capabilities;
@@ -47,7 +48,7 @@ type CommandPush = {
 };
 type CommandFetch = {
   command: GitCommands.fetch;
-  refs: string[];
+  refs: FetchRef[];
 };
 export type Command =
   | CommandCapabilities
@@ -56,26 +57,32 @@ export type Command =
   | CommandPush
   | CommandFetch;
 
+type HandlePush = (params: { refs: PushRef[]; dir: string }) => Promise<string>;
+type HandleFetch = (params: {
+  refs: FetchRef[];
+  dir: string;
+}) => Promise<string>;
+
 type ApiBase = {
   list: (params: {
     refs: string[];
     dir: string;
     forPush: boolean;
   }) => Promise<string>;
-  handlePush?: (params: { refs: PushRef[]; dir: string }) => Promise<string>;
-  handleFetch?: (params: { refs: string[]; dir: string }) => Promise<string>;
+  handlePush?: HandlePush;
+  handleFetch?: HandleFetch;
 };
 type ApiPush = ApiBase & {
-  handlePush: (params: { refs: PushRef[]; dir: string }) => Promise<string>;
+  handlePush: HandlePush;
   handleFetch?: undefined;
 };
 type ApiFetch = ApiBase & {
   handlePush?: undefined;
-  handleFetch: (params: { refs: string[]; dir: string }) => Promise<string>;
+  handleFetch: HandleFetch;
 };
 type ApiBoth = ApiBase & {
-  handlePush: (params: { refs: PushRef[]; dir: string }) => Promise<string>;
-  handleFetch: (params: { refs: string[]; dir: string }) => Promise<string>;
+  handlePush: HandlePush;
+  handleFetch: HandleFetch;
 };
 type Api = ApiPush | ApiFetch | ApiBoth;
 
@@ -198,8 +205,18 @@ const GitRemoteHelper = ({
           const [, key, value] = command.split(' ');
           return { command: GitCommands.option, key, value };
         } else if (command.startsWith(GitCommands.fetch)) {
-          return { command: GitCommands.fetch, refs: lines };
+          // Lines for fetch commands look like:
+          // fetch sha1 branchName
+          const refs = lines.map(line => {
+            const [, oid, ref] = line.split(' ');
+            return { oid, ref };
+          });
+
+          return { command: GitCommands.fetch, refs };
         } else if (command.startsWith(GitCommands.push)) {
+          // Lines for push commands look like this (the + means force push):
+          // push refs/heads/master:refs/heads/master
+          // push +refs/heads/master:refs/heads/master
           const refs = lines.map(line => {
             // Strip the leading `push ` from the line
             const refsAndForce = line.slice(5);
