@@ -324,9 +324,15 @@ export const pushRef = async ({
 
   // If we're trying to push, and we are already up to date, then stop here
   const refs = await getRefs({ fs, dir });
+  const refObjectIds = Object.values(refs);
+
   // If the commit we want to push exists on any of our refs (branches, tags)
   // then we can safely skip it. That commit has already been pushed.
-  if (Object.values(refs).includes(refCommitId)) {
+  if (refObjectIds.includes(refCommitId)) {
+    logPushRef(
+      'Skipping push which is already complete #smeIax',
+      JSON.stringify({ pushRef, refCommitId })
+    );
     return {
       objectIds: new Set<string>(),
       filenames: new Set<string>(),
@@ -338,8 +344,30 @@ export const pushRef = async ({
 
   if (__DEV__) logPushRef('Got log #BoPmIA', pushRef, log.length);
 
+  // TODO Figure out how only push new commits here
+  // For example, we could stop when we see any of the commits from the refs
+  // above.
+  let reachedExistingRef = false;
+
   await Bluebird.each(log, async logEntry => {
     const { oid: commitId } = logEntry;
+
+    // Once we reach this, nothing else to do, skip all other commits in the log
+    if (reachedExistingRef) {
+      return;
+    }
+
+    // If this commit is anywhere in our existing refs, then all its children
+    // and parents have already been pushed, so we can safely stop traversing
+    // the log history here.
+    if (refObjectIds.includes(commitId)) {
+      logPushRef(
+        'Reached an existing commit #8mOmVZ',
+        JSON.stringify({ pushRef, commitId })
+      );
+      reachedExistingRef = true;
+      return;
+    }
 
     // If we've already seen this node, stop here
     if (objectIds.has(commitId)) {
