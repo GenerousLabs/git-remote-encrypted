@@ -4,7 +4,6 @@ import { asyncMap } from 'rxjs-async-map';
 import { rxToStream, streamToStringRx } from 'rxjs-stream';
 import { filter, map, mergeMap, scan, tap } from 'rxjs/operators';
 
-// TODO Implement fetch
 // TODO Add tests
 
 enum GitCommands {
