@@ -224,7 +224,7 @@ const GitRemoteHelper = ({
         );
         return capabilitiesResponse;
       } else if (command.command === GitCommands.option) {
-        // Disable all options for now
+        // TODO Figure out how to handle options properly
         log(
           'Reporting option unsupported #WdUrzx',
           JSON.stringify({ command })
