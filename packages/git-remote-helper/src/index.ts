@@ -8,6 +8,8 @@ enum GitCommands {
   capabilities = 'capabilities',
   option = 'option',
   list = 'list',
+  push = 'push',
+  fetch = 'fetch',
 }
 const ONE_LINE_COMMANDS = [
   GitCommands.capabilities,
@@ -24,23 +26,23 @@ const logError = debug([LOG_NAMESPACE, 'error'].join(':'));
 export type PushRef = { src: string; dst: string; force: boolean };
 
 type CommandCapabilities = {
-  command: 'capabilities';
+  command: GitCommands.capabilities;
 };
 type CommandOption = {
-  command: 'option';
+  command: GitCommands.option;
   key: string;
   value: string;
 };
 type CommandList = {
-  command: 'list';
+  command: GitCommands.list;
   forPush: boolean;
 };
 type CommandPush = {
-  command: 'push';
+  command: GitCommands.push;
   refs: PushRef[];
 };
 type CommandFetch = {
-  command: 'fetch';
+  command: GitCommands.fetch;
   refs: string[];
 };
 export type Command =
@@ -95,13 +97,13 @@ const GitRemoteHelper = ({
   const dir = path.join(process.cwd(), getDir());
 
   const capabilitiesResponse =
-    ['option', 'push', 'fetch']
+    [GitCommands.option, GitCommands.push, GitCommands.fetch]
       .filter(option => {
-        if (option === 'option') {
+        if (option === GitCommands.option) {
           return true;
-        } else if (option === 'push') {
+        } else if (option === GitCommands.push) {
           return typeof api.handlePush === 'function';
-        } else if (option === 'fetch') {
+        } else if (option === GitCommands.fetch) {
           return typeof api.handleFetch === 'function';
         } else {
           throw new Error('Unknown option #GDhBnb');
@@ -182,19 +184,19 @@ const GitRemoteHelper = ({
         const command = lines[0];
 
         if (command.startsWith('capabilities')) {
-          return { command: 'capabilities' };
-          // NOTE: This must come before the check for `list`
-        } else if (command.startsWith('list for-push')) {
-          return { command: 'list', forPush: true };
-        } else if (command.startsWith('list')) {
-          return { command: 'list', forPush: false };
-        } else if (command.startsWith('option')) {
+          return { command: GitCommands.capabilities };
+        } else if (command.startsWith(GitCommands.list)) {
+          return {
+            command: GitCommands.list,
+            forPush: command.startsWith('list for-push'),
+          };
+        } else if (command.startsWith(GitCommands.option)) {
           const [, key, value] = command.split(' ');
-          return { command: 'option', key, value };
-        } else if (command.startsWith('fetch')) {
+          return { command: GitCommands.option, key, value };
+        } else if (command.startsWith(GitCommands.fetch)) {
           const refs = lines.slice(1);
-          return { command: 'fetch', refs };
-        } else if (command.startsWith('push')) {
+          return { command: GitCommands.fetch, refs };
+        } else if (command.startsWith(GitCommands.push)) {
           const refs = lines.map(line => {
             // Strip the leading `push ` from the line
             const refsAndForce = line.slice(5);
@@ -204,27 +206,27 @@ const GitRemoteHelper = ({
             return { src, dst, force };
           });
 
-          return { command: 'push', refs };
+          return { command: GitCommands.push, refs };
         }
 
         throw new Error('Unknown command #Py9QTP');
       }
     ),
     asyncMap(async command => {
-      if (command.command === 'capabilities') {
+      if (command.command === GitCommands.capabilities) {
         log(
           'Returning capabilities #MJMFfj',
           JSON.stringify({ command, capabilitiesResponse })
         );
         return capabilitiesResponse;
-      } else if (command.command === 'option') {
+      } else if (command.command === GitCommands.option) {
         // Disable all options for now
         log(
           'Reporting option unsupported #WdUrzx',
           JSON.stringify({ command })
         );
         return 'unsupported\n';
-      } else if (command.command === 'list') {
+      } else if (command.command === GitCommands.list) {
         const { forPush } = command;
         try {
           return api.list({ refs: [], dir, forPush });
@@ -232,7 +234,7 @@ const GitRemoteHelper = ({
           console.error('api.list threw #R8aJlZ');
           console.error(error);
         }
-      } else if (command.command === 'push') {
+      } else if (command.command === GitCommands.push) {
         log('Calling api.handlePush() #qpi4Ah');
         const { refs } = command;
         if (typeof api.handlePush === 'undefined') {
@@ -244,7 +246,7 @@ const GitRemoteHelper = ({
           console.error('api.handlePush threw #R8aJlZ');
           console.error(error);
         }
-      } else if (command.command === 'fetch') {
+      } else if (command.command === GitCommands.fetch) {
         const { refs } = command;
         if (typeof api.handleFetch === 'undefined') {
           throw new Error('api.handleFetch undefined #9eNmmz');
