@@ -1,14 +1,25 @@
 import debug from 'debug';
 import path from 'path';
-import { Subject } from 'rxjs';
 import { asyncMap } from 'rxjs-async-map';
 import { rxToStream, streamToStringRx } from 'rxjs-stream';
-import { bufferWhen, filter, map, tap } from 'rxjs/operators';
+import { filter, flatMap, map, scan, tap } from 'rxjs/operators';
+
+enum GitCommands {
+  capabilities = 'capabilities',
+  option = 'option',
+  list = 'list',
+}
+const ONE_LINE_COMMANDS = [
+  GitCommands.capabilities,
+  GitCommands.option,
+  GitCommands.list,
+];
 
 const LOG_NAMESPACE = 'git-remote-helper';
 const log = debug(LOG_NAMESPACE);
 const logInput = debug([LOG_NAMESPACE, 'io', 'input'].join(':'));
 const logOutput = debug([LOG_NAMESPACE, 'io', 'output'].join(':'));
+const logError = debug([LOG_NAMESPACE, 'error'].join(':'));
 
 export type PushRef = { src: string; dst: string; force: boolean };
 
@@ -73,12 +84,7 @@ const GitRemoteHelper = ({
   stdout: typeof process.stdout;
   api: Api;
 }) => {
-  const trigger = new Subject<string>();
   const inputStream = streamToStringRx(stdin);
-
-  inputStream.subscribe(line =>
-    logInput('Got raw input line #soQ9FY', JSON.stringify(line))
-  );
 
   const getDir = () => {
     if (typeof env['GIT_DIR'] !== 'string') {
@@ -105,36 +111,69 @@ const GitRemoteHelper = ({
 
   log('Startup #p6i3kB', { dir, capabilitiesResponse });
 
-  const output = inputStream.pipe(
+  const commands = inputStream.pipe(
     tap(line => {
-      trigger.next(line);
+      logInput('Got raw input line #gARMUQ', JSON.stringify(line));
     }),
-    map(x => x.trimEnd()),
-    bufferWhen(() =>
-      trigger.pipe(
-        filter(triggerValue => {
-          // log('Filtering trigger value #FVPZ6y', line);
-          if (
-            triggerValue === ''
-            // triggerValue.startsWith('capabilities') ||
-            // triggerValue.startsWith('option')
-          ) {
-            log('Emptying buffer #mwvjhm', JSON.stringify(triggerValue));
-            return false;
-          } else {
-            log('Buffering this line #Pfi7Ss', JSON.stringify(triggerValue));
-            return true;
+    // The `line` can actually contain multiple lines, so we split them out into
+    // multiple pieces and recombine them again
+    map(line => line.split('\n')),
+    flatMap(lineGroup => lineGroup),
+    // Commands include a trailing newline which we don't need
+    map(line => line.trimEnd()),
+    scan(
+      (acc, line) => {
+        log('Scanning #NH7FyX', JSON.stringify({ acc, line }));
+        // If we emitted the last value, then we ignore all of the current lines
+        // and start fresh on the next "batch"
+        const linesWaitingToBeEmitted = acc.emit ? [] : acc.lines;
+
+        // When we hit an empty line, it's always the completion of a command
+        // block, so we always want to emit the lines we've been collecting.
+        // NOTE: We do not add the blank line onto the existing array of lines
+        // here, it gets dropped here.
+        if (line === '') {
+          if (linesWaitingToBeEmitted.length === 0) {
+            return { emit: false, lines: [] };
           }
-        }),
-        tap(line => {
-          log('trigger value #E7XHKm', JSON.stringify(line));
-        })
-      )
+
+          return { emit: true, lines: linesWaitingToBeEmitted };
+        }
+
+        // Some commands emit one line at a time and so do not get buffered
+        if (ONE_LINE_COMMANDS.find(command => line.startsWith(command))) {
+          // If we have other lines waiting for emission, something went wrong
+          if (linesWaitingToBeEmitted.length > 0) {
+            logError(
+              'Got one line command with lines waiting #ompfQK',
+              JSON.stringify({ linesWaitingToBeEmitted })
+            );
+            throw new Error('Got one line command with lines waiting #evVyYv');
+          }
+
+          return { emit: true, lines: [line] };
+        }
+
+        // Otherwise, this line is part of a multi line command, so stick it
+        // into the "buffer" and do not emit
+        return { emit: false, lines: linesWaitingToBeEmitted.concat(line) };
+      },
+      { emit: false, lines: [] as string[] }
     ),
+    tap(acc => {
+      log('Scan output #SAAmZ4', acc);
+    }),
+    filter(acc => acc.emit),
+    map(emitted => emitted.lines),
     tap(lines => {
       log('Buffer emptied #TRqQFc', JSON.stringify(lines));
-    }),
-    filter(lines => lines.length > 0),
+    })
+  );
+
+  // NOTE: Splitting this into 2 pipelines so typescript is happy that it
+  // produces a string
+  const output = commands.pipe(
+    // filter(lines => lines.length > 0),
     // Build objects from the sequential lines
     map(
       (lines): Command => {
@@ -164,6 +203,7 @@ const GitRemoteHelper = ({
             const [src, dst] = refs.split(':');
             return { src, dst, force };
           });
+
           return { command: 'push', refs };
         }
 
@@ -172,11 +212,17 @@ const GitRemoteHelper = ({
     ),
     asyncMap(async command => {
       if (command.command === 'capabilities') {
-        log('Returning capabilities #MJMFfj', command, capabilitiesResponse);
+        log(
+          'Returning capabilities #MJMFfj',
+          JSON.stringify({ command, capabilitiesResponse })
+        );
         return capabilitiesResponse;
       } else if (command.command === 'option') {
         // Disable all options for now
-        log('Reporting option unsupported #WdUrzx', command);
+        log(
+          'Reporting option unsupported #WdUrzx',
+          JSON.stringify({ command })
+        );
         return 'unsupported\n';
       } else if (command.command === 'list') {
         const { forPush } = command;
@@ -187,6 +233,7 @@ const GitRemoteHelper = ({
           console.error(error);
         }
       } else if (command.command === 'push') {
+        log('Calling api.handlePush() #qpi4Ah');
         const { refs } = command;
         if (typeof api.handlePush === 'undefined') {
           throw new Error('api.handlePush undefined #9eNmmz');

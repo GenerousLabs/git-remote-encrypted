@@ -1,50 +1,37 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import http from 'isomorphic-git/http/node';
-import git from './';
-import split from 'split';
 import debug from 'debug';
+import GitRemoteHelper, { PushRef } from 'git-remote-helper';
 
 const log = debug('cli');
 
-const input = process.stdin.pipe(split());
-const output = process.stdout;
-
-const dir = process.cwd();
-
-input.on('data', async (line: string) => {
-  log('Got line #VkenW7', line);
-
-  if (line === 'capabilities') {
-    output.write('option\npush\nfetch\n\n');
-    log('Written capabilities #EGhHeC');
-  }
-  if (line.startsWith('option')) {
-    output.write('unsupported\n');
-    log('Written options unsupported #RURNt1');
-  }
-  if (line.startsWith('list')) {
-    //
-  }
-  if (line.startsWith('list for-push')) {
-    output.write('? refs/heads/master\n@refs/heads/master HEAD\n\n');
-    log('Written list for-pusth #xgF2Xn');
-  }
-  if (line.startsWith('push')) {
-    const [, refs] = line.split(' ');
-    const [, dst] = refs.split(':');
-    output.write(`ok ${dst}\n\n`);
-    log('Written push response #sfRvdP');
-  }
-  if (line === '') {
-    //
-  }
-
-  return;
-  console.log('started #vOs0CG', git, params);
+GitRemoteHelper({
+  env: process.env,
+  stdin: process.stdin,
+  stdout: process.stdout,
+  api: {
+    list: async ({
+      dir,
+      forPush,
+      refs,
+    }: {
+      refs: string[];
+      dir: string;
+      forPush: boolean;
+    }) => {
+      log('Got list command #VJhzH4', dir, forPush, refs);
+      if (forPush) {
+        return '? refs/heads/master\n@refs/heads/master HEAD\n\n';
+      } else {
+        return '91172de05a7e6e19f91ef97daf157a9de0b9da1a refs/heads/master\n@refs/heads/master HEAD\n\n';
+      }
+    },
+    handleFetch: async () => {
+      return '';
+    },
+    handlePush: async ({ refs }: { dir: string; refs: PushRef[] }) => {
+      // Do the actual magic here
+      return refs.map(ref => `ok ${ref.dst}`).join('\n') + '\n\n';
+    },
+  },
 });
-
-const params = { fs, http, dir };
-
-// git.clone({ ...params, url: 'http' });
