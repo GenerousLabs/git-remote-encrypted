@@ -1,18 +1,13 @@
 import { arrayToHex } from 'enc-utils';
 import { hash, randomBytes, secretbox } from 'tweetnacl';
-import { decodeBase64, decodeUTF8, encodeBase64 } from 'tweetnacl-util';
+import { decodeUTF8, encodeBase64 } from 'tweetnacl-util';
+import { DEFAULT_KEYS } from './constants';
 
 export type KEYS = {
   secret: Uint8Array;
   secretNonce: Uint8Array;
   filenames: Uint8Array;
   filenamesNonce: Uint8Array;
-};
-const DEFAULT_KEYS: KEYS = {
-  secret: decodeBase64('OTdY2G5jOtUb4NkTIrcMic5Om2FSGVNr+mOV21bMfkY='),
-  secretNonce: decodeBase64('wIfKspQFPMhcpxWSNO/d/aA50ErheC6t'),
-  filenames: decodeBase64('aeFYzTwOrPbAPu7Lyw1QZ34JglphbLTgAAHtjr2Zcps='),
-  filenamesNonce: decodeBase64('JbTmJEJIT3fx2agUFmLFkb0Zk60/Eeoa'),
 };
 
 const { nonceLength: NONCE_LENGTH } = secretbox;

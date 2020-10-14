@@ -5,9 +5,11 @@ import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import { deflate, inflate } from 'pako';
 import path from 'path';
-import { decodeUTF8 } from 'tweetnacl-util';
+import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { decrypt, encrypt } from './crypto';
 import { packageLog } from './log';
+import { FS } from './types';
+import { wrap } from './utils';
 
 /**
  * DO
@@ -22,12 +24,6 @@ import { packageLog } from './log';
  */
 
 // NOTE: This is the ref of an "empty" repo in regular git
-const REF_OID = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
-
-const GIT_ENCRYPTED_AUTHOR = {
-  name: 'Encryption',
-} as const;
-const GIT_ENCRYPTED_MESSAGE = 'Encrypted push' as const;
 
 const log = packageLog.extend('encrypted');
 
@@ -38,22 +34,6 @@ const params = {
   fs,
   http,
   dir,
-};
-
-/**
- * Wrap a git object. Prepend the object with the type, byte length, etc.
- */
-const wrap = ({
-  type,
-  object,
-}: {
-  type: string;
-  object: Uint8Array | Buffer;
-}) => {
-  return Buffer.concat([
-    Buffer.from(`${type} ${object.byteLength.toString()}\x00`),
-    Buffer.from(object),
-  ]);
 };
 
 export const writeFile = async (filename: string, content: Uint8Array) => {
@@ -147,29 +127,6 @@ export const getAllRefNames = async () => {
   return refs;
 };
 
-export const pushRefs = async () => {
-  const refs = await getAllRefNames();
-
-  const refPairs = await Bluebird.reduce<string, [string, string][]>(
-    refs,
-    async (acc, ref) => {
-      const expanded = await git.expandRef({ ...params, ref });
-      const targetObjectId = await git.resolveRef({ ...params, ref: expanded });
-      return acc.concat([[targetObjectId, expanded]]);
-    },
-    []
-  );
-
-  const refsString = refPairs.join('\n');
-  const refsArray = decodeUTF8(refsString);
-
-  await encryptAndWriteFile({
-    oid: REF_OID,
-    deflatedContent: refsArray,
-    filenames: new Set<string>(),
-  });
-};
-
 const logPush = log.extend('push');
 export const push = async () => {
   if (__DEV__) logPush('dir #AGIM7a', params.dir);
@@ -253,9 +210,9 @@ pushCommand.action(async () => {
 });
 program.addCommand(pushCommand);
 
-const logPull = log.extend('pull');
-export const pull = async () => {
-  const files = await fs.promises.readdir(encryptedDir);
+const logPull = log.extend('pull:noisy');
+export const pull = async ({ dir, fs }: { dir: string; fs: FS }) => {
+  const files: string[] = await fs.promises.readdir(encryptedDir);
 
   await Bluebird.each(files, async file => {
     if (file === '.git') {
@@ -263,10 +220,7 @@ export const pull = async () => {
     }
     if (__DEV__) logPull('Got file #GRFGoJ', file);
 
-    const contents = await fs.promises.readFile(
-      path.join(encryptedDir, file),
-      {}
-    );
+    const contents = await fs.promises.readFile(path.join(encryptedDir, file));
 
     const decrypted = await decrypt(contents);
     if (__DEV__) logPull('Decrypted #o4Jmke', decrypted.length, decrypted);
@@ -276,7 +230,8 @@ export const pull = async () => {
     if (__DEV__) logPull('Inflated #Y8qAIG', inflated.length);
 
     const oid = await git.writeObject({
-      ...params,
+      fs,
+      dir,
       object: inflated,
       format: 'wrapped',
     });
@@ -287,7 +242,7 @@ export const pull = async () => {
 
 const pullCommand = program.createCommand('pull');
 pullCommand.action(async () => {
-  await pull();
+  await pull(params);
 });
 program.addCommand(pullCommand);
 
@@ -379,7 +334,9 @@ export const pushRef = async ({
     await walkTreeForObjectIds(logEntry.commit.tree, objectIds);
   });
 
-  return await encryptAndSaveObjects({ objectIds });
+  const results = await encryptAndSaveObjects({ objectIds });
+
+  return { ...results, refCommitId };
 };
 
 const logE = log.extend('encryptedRepoAddAndPush');
