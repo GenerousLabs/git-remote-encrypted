@@ -47,14 +47,17 @@ export const refsToString = ({ refs }: { refs: Refs }) => {
   return Object.entries(refs)
     .map(pairs => {
       const [ref, oid] = pairs;
-      return `${ref} ${oid}`;
+      return `${oid} ${ref}`;
     })
     .join('\n');
 };
 
 export const stringToRefs = ({ refsString }: { refsString: string }): Refs => {
   const refsEntries = refsString.split('\n').map(line => {
-    return line.split(' ');
+    const [oid, ref] = line.split(' ');
+    // We swap the order here so the output can be passed to
+    // `Object.fromEntries()` and have the `ref` as the property name.
+    return [ref, oid];
   });
   const refs = Object.fromEntries(refsEntries);
   return refs;
