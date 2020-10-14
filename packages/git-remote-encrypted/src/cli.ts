@@ -13,7 +13,7 @@ import GitRemoteHelper from 'git-remote-helper';
 import http from 'isomorphic-git/http/node';
 import { encryptedRepoAddAndPush, pull, pushRef } from './encrypted';
 import { packageLog } from './log';
-import { nodePush } from './nodePush';
+import { nodePush } from './nodePushPull';
 import { getRefs, refsToString, setRef } from './refs';
 import { gitDirToEncryptedDir } from './utils';
 

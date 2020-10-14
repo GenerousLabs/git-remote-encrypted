@@ -8,9 +8,9 @@ import path from 'path';
 import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { decrypt, encrypt } from './crypto';
 import { packageLog } from './log';
-import { nodePush } from './nodePush';
+import { nodePush } from './nodePushPull';
 import { getRefs } from './refs';
-import { FS, GitBaseParams, Push } from './types';
+import { FS, GitBaseParams, PushPull } from './types';
 import { wrap } from './utils';
 
 /**
@@ -393,7 +393,7 @@ export const doEncryptedRepoPush = async ({
   push,
 }: Omit<GitBaseParams, 'dir'> &
   EncryptedPushParams & {
-    push: Push;
+    push: PushPull;
   }) => {
   const [url, branch = 'main'] = remoteUrl.split('#');
   logEncryptedRepoPush(
@@ -424,7 +424,7 @@ export const encryptedRepoAddAndPush = async ({
   remoteUrl,
 }: Omit<GitBaseParams, 'dir'> &
   EncryptedPushParams & {
-    push: Push;
+    push: PushPull;
   }) => {
   logE('Invoked #qm8Cu0', JSON.stringify({ encryptedDir, remoteUrl }));
 

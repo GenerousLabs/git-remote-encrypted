@@ -34,7 +34,7 @@ export type GitBaseParams = {
   http: HttpClient;
 };
 
-export type Push = (
+export type PushPull = (
   params: GitBaseParams & {
     /**
      * The remote URL, as it should be passed to git. So already stripped of all
