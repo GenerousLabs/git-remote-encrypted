@@ -41,31 +41,6 @@ GitRemoteHelper({
       const refsString = refsToString({ refs: existingRefs });
 
       return `${refsString}\n\n`;
-      // If there are no existing refs, then return nothing
-      if (Object.keys(existingRefs).length === 0) {
-        // return '? refs/heads/master\n@refs/heads/master HEAD\n\n';
-        return '\n';
-      }
-
-      const refLines = Object.entries(existingRefs).map(pair => {
-        const [ref, oid] = pair;
-        return `${oid} ${ref}\n`;
-      });
-
-      return `${refLines}\n`;
-
-      // TODO Get the real refs here
-      if (forPush) {
-        // return '6461a36f29705b8f3d141ef877715b61c38c7158 refs/heads/master\n@refs/heads/master HEAD\n\n';
-        // return '91172de05a7e6e19f91ef97daf157a9de0b9da1a refs/heads/master\n@refs/heads/master HEAD\n\n';
-        // return '? refs/heads/master\n@refs/heads/master HEAD\n\n';
-        return '? refs/heads/master\n\n';
-      } else {
-        return '6461a36f29705b8f3d141ef877715b61c38c7158 refs/heads/master\n@refs/heads/master HEAD\n\n';
-        // return '91172de05a7e6e19f91ef97daf157a9de0b9da1a refs/heads/master\n@refs/heads/master HEAD\n\n';
-        // return '? refs/heads/master\n@refs/heads/master HEAD\n\n';
-        // return '350130914f6b01295339259ad1bb179773fecb1c refs/heads/master\n@refs/heads/master HEAD\n\n';
-      }
     },
     handleFetch: async ({ refs, dir }) => {
       // TODO Implement the fetch of objects here
