@@ -20,10 +20,11 @@ const ONE_LINE_COMMANDS = [
   GitCommands.list,
 ];
 
-const LOG_NAMESPACE = 'git-remote-helper';
-const logError = debug(LOG_NAMESPACE);
-const log = logError.extend('noisy');
-const logIo = logError.extend('io');
+const logError = (...args: any) => {
+  console.error(...args);
+};
+const log = debug('git-remote-helper');
+const logIo = log.extend('io');
 const logInput = logIo.extend('input');
 const logOutput = logIo.extend('output');
 
