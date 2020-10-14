@@ -199,8 +199,7 @@ const GitRemoteHelper = ({
           const [, key, value] = command.split(' ');
           return { command: GitCommands.option, key, value };
         } else if (command.startsWith(GitCommands.fetch)) {
-          const refs = lines.slice(1);
-          return { command: GitCommands.fetch, refs };
+          return { command: GitCommands.fetch, refs: lines };
         } else if (command.startsWith(GitCommands.push)) {
           const refs = lines.map(line => {
             // Strip the leading `push ` from the line
