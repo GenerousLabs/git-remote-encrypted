@@ -311,16 +311,16 @@ export const pushRef = async ({
 
   const expandedRef = await git.expandRef({ ...params, ref: pushRef });
   if (__DEV__)
-    logPushRef('Succefully expanded ref #cPB6D4', pushRef, expandedRef);
+    logPushRef('Succefully expanded ref #IbfNay', pushRef, expandedRef);
 
   const refCommitId = await git.resolveRef({ ...params, ref: expandedRef });
   if (__DEV__)
-    logPushRef('Succefully resolved ref #eZGHj0', pushRef, refCommitId);
+    logPushRef('Succefully resolved ref #TY3tfW', pushRef, refCommitId);
 
   // NOTE: Not all refs
   const log = await git.log({ ...params, ref: refCommitId });
 
-  if (__DEV__) logPushRef('Log #T71dMA', pushRef, log.length);
+  if (__DEV__) logPushRef('Got log #BoPmIA', pushRef, log.length);
 
   await Bluebird.each(log, async logEntry => {
     const { oid: commitId } = logEntry;
@@ -359,5 +359,6 @@ export const encryptedRepoAddAndPush = async ({
   });
 
   logE('encryptedRepoAddAndPush() success #jXJ7PD');
+
   // TODO Figure out how to do the upstream push here
 };
