@@ -4,6 +4,8 @@ import debug from 'debug';
 import GitRemoteHelper, { PushRef } from 'git-remote-helper';
 
 const log = debug('cli');
+const logList = log.extend('list');
+const logPush = log.extend('push');
 
 GitRemoteHelper({
   env: process.env,
@@ -19,7 +21,7 @@ GitRemoteHelper({
       dir: string;
       forPush: boolean;
     }) => {
-      log('Got list command #VJhzH4', dir, forPush, refs);
+      logList('Got list command #VJhzH4', dir, forPush, refs);
       if (forPush) {
         return '? refs/heads/master\n@refs/heads/master HEAD\n\n';
       } else {
@@ -30,6 +32,7 @@ GitRemoteHelper({
       return '';
     },
     handlePush: async ({ refs }: { dir: string; refs: PushRef[] }) => {
+      logPush('handlePush() invoked #Fl6g38');
       // Do the actual magic here
       return refs.map(ref => `ok ${ref.dst}`).join('\n') + '\n\n';
     },
