@@ -2,7 +2,10 @@ import debug from 'debug';
 import path from 'path';
 import { asyncMap } from 'rxjs-async-map';
 import { rxToStream, streamToStringRx } from 'rxjs-stream';
-import { filter, flatMap, map, scan, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, scan, tap } from 'rxjs/operators';
+
+// TODO Implement fetch
+// TODO Add tests
 
 enum GitCommands {
   capabilities = 'capabilities',
@@ -120,7 +123,7 @@ const GitRemoteHelper = ({
     // The `line` can actually contain multiple lines, so we split them out into
     // multiple pieces and recombine them again
     map(line => line.split('\n')),
-    flatMap(lineGroup => lineGroup),
+    mergeMap(lineGroup => lineGroup),
     // Commands include a trailing newline which we don't need
     map(line => line.trimEnd()),
     scan(
