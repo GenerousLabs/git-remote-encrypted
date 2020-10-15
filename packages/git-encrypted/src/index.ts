@@ -1,6 +1,5 @@
-export const sum = (a: number, b: number) => {
-  if ('development' === process.env.NODE_ENV) {
-    console.log('boop');
-  }
-  return a + b;
-};
+export { encryptedInit } from './api/encryptedInit';
+export { encryptedPush } from './api/encryptedPush';
+export { encryptedPull } from './api/encryptedPull';
+
+export * from './utils';

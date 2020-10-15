@@ -13,9 +13,9 @@ import GitRemoteHelper from 'git-remote-helper';
 import http from 'isomorphic-git/http/node';
 import { encryptedRepoAddAndPush, pull, pushRef } from './encrypted';
 import { packageLog } from './log';
-import { nodePush } from './nodePushPull';
+import { encryptedNodePush } from './nodePushPull';
 import { getRefs, refsToString, setRef } from './refs';
-import { gitDirToEncryptedDir } from './utils';
+import { gitDirToEncryptedDir } from 'git-encrypted';
 
 globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
@@ -30,15 +30,15 @@ GitRemoteHelper({
   stdout: process.stdout,
   api: {
     list: async ({
-      dir,
+      gitDir,
       forPush,
       refs,
     }: {
       refs: string[];
-      dir: string;
+      gitDir: string;
       forPush: boolean;
     }) => {
-      logList('Got list command #VJhzH4', dir, forPush, refs);
+      logList('Got list command #VJhzH4', gitDir, forPush, refs);
 
       const existingRefs = await getRefs({ fs, dir });
       const refsString = refsToString({ refs: existingRefs });
@@ -53,6 +53,12 @@ GitRemoteHelper({
     handleFetch: async ({ refs, dir }) => {
       // TODO Implement the fetch of objects here
       logFetch('handleFetch() invoked #nGa2WK', JSON.stringify({ refs }));
+
+      // - [ ] Ensure that the `encrypted/` folder exists
+      // - [ ] Ensure that it's a git repository
+      // - [ ] `git pull` from the remote
+      // - [ ] Run our local decryption pull
+
       // Fetch need only return a single newline after it's completed, then it
       // is assumed to have succeeded.
       await pull({ fs, dir });
@@ -103,7 +109,7 @@ GitRemoteHelper({
         encryptedDir,
         http,
         remoteUrl,
-        push: nodePush,
+        push: encryptedNodePush,
       });
 
       return response.join('\n') + '\n\n';

@@ -8,10 +8,16 @@ import path from 'path';
 import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { decrypt, encrypt } from './crypto';
 import { packageLog } from './log';
-import { nodePush } from './nodePushPull';
+import { encryptedNodePush } from './nodePushPull';
 import { getRefs } from './refs';
-import { FS, GitBaseParams, PushPull } from './types';
-import { wrap } from './utils';
+import {
+  EncryptedPushParams,
+  EncryptedPushPull,
+  FS,
+  GitBaseParams,
+  GitBaseParamsEncrypted,
+} from './types';
+import { doesDirectoryExist, wrap } from './utils';
 
 /**
  * DO
@@ -390,10 +396,10 @@ export const doEncryptedRepoPush = async ({
   http,
   encryptedDir,
   remoteUrl,
-  push,
+  encyryptedPush,
 }: Omit<GitBaseParams, 'dir'> &
   EncryptedPushParams & {
-    push: PushPull;
+    encyryptedPush: EncryptedPushPull;
   }) => {
   const [url, branch = 'main'] = remoteUrl.split('#');
   logEncryptedRepoPush(
@@ -401,18 +407,7 @@ export const doEncryptedRepoPush = async ({
     JSON.stringify({ url, branch })
   );
 
-  await push({ dir: encryptedDir, url, branch, fs, http });
-};
-
-type EncryptedPushParams = {
-  /**
-   * The path to the encrypted upstream git repository.
-   */
-  encryptedDir: string;
-  /**
-   * The remote URL provided from the native git client
-   */
-  remoteUrl: string;
+  await encyryptedPush({ encryptedDir, url, branch, fs, http });
 };
 
 const logE = log.extend('encryptedRepoAddAndPush');
@@ -424,7 +419,7 @@ export const encryptedRepoAddAndPush = async ({
   remoteUrl,
 }: Omit<GitBaseParams, 'dir'> &
   EncryptedPushParams & {
-    push: PushPull;
+    push: EncryptedPushPull;
   }) => {
   logE('Invoked #qm8Cu0', JSON.stringify({ encryptedDir, remoteUrl }));
 
@@ -460,7 +455,7 @@ export const encryptedRepoAddAndPush = async ({
       http,
       encryptedDir,
       remoteUrl,
-      push: nodePush,
+      encyryptedPush: encryptedNodePush,
     });
     return;
   }
@@ -479,7 +474,7 @@ export const encryptedRepoAddAndPush = async ({
     http,
     encryptedDir,
     remoteUrl,
-    push: nodePush,
+    encyryptedPush: encryptedNodePush,
   });
 
   logE('encryptedRepoAddAndPush() success #jXJ7PD');

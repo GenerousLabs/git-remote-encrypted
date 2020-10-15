@@ -1,15 +1,19 @@
 import execa from 'execa';
 import { packageLog } from './log';
-import { PushPull } from './types';
+import { EncryptedPushPull } from './types';
 
 const log = packageLog.extend('node');
 const logPush = log.extend('push');
 const logPull = log.extend('pull');
 
-export const nodePush: PushPull = async ({ dir, url, branch }) => {
+export const encryptedNodePush: EncryptedPushPull = async ({
+  encryptedDir,
+  url,
+  branch,
+}) => {
   logPush('Running nodePush() #QSGMOe');
   const result = await execa('git', ['push', url, `${branch}:${branch}`], {
-    cwd: dir,
+    cwd: encryptedDir,
   });
 
   if (result.exitCode !== 0) {
@@ -18,10 +22,14 @@ export const nodePush: PushPull = async ({ dir, url, branch }) => {
   }
 };
 
-export const nodePull: PushPull = async ({ dir, url, branch }) => {
+export const encryptedNodePull: EncryptedPushPull = async ({
+  encryptedDir,
+  url,
+  branch,
+}) => {
   logPull('Running nodePull() #xSQvYe');
   const result = await execa('git', ['pull', url, `${branch}:${branch}`], {
-    cwd: dir,
+    cwd: encryptedDir,
   });
 
   if (result.exitCode !== 0) {
