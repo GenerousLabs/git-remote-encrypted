@@ -60,7 +60,7 @@ export type Command =
 /**
  * These are parameters which are passed to every api callback
  */
-type ApiBaseParmas = {
+type ApiBaseParams = {
   gitdir: string;
   /**
    * The remote name, or the remote URL if a name is not provided. Supplied by
@@ -76,17 +76,24 @@ type ApiBaseParmas = {
 };
 
 type HandlePush = (
-  params: ApiBaseParmas & { refs: PushRef[] }
+  params: ApiBaseParams & { refs: PushRef[] }
 ) => Promise<string>;
 type HandleFetch = (
-  params: ApiBaseParmas & {
+  params: ApiBaseParams & {
     refs: FetchRef[];
   }
 ) => Promise<string>;
 
 type ApiBase = {
+  /**
+   * Optional init() hook which will be called each time that the
+   * git-remote-helper is invoked before any other APIs are called. It will be
+   * awaited, so you can safely do setup steps here and trust they will be
+   * finished before any of the other API methods are invoked.
+   */
+  init?: (params: ApiBaseParams) => Promise<void>;
   list: (
-    params: ApiBaseParmas & {
+    params: ApiBaseParams & {
       refs: string[];
       forPush: boolean;
     }
@@ -108,7 +115,7 @@ type ApiBoth = ApiBase & {
 };
 type Api = ApiPush | ApiFetch | ApiBoth;
 
-const GitRemoteHelper = ({
+const GitRemoteHelper = async ({
   env,
   api,
   stdin,
@@ -152,6 +159,10 @@ const GitRemoteHelper = ({
     remoteUrl,
     capabilitiesResponse,
   });
+
+  if (typeof api.init === 'function') {
+    await api.init({ gitdir, remoteName, remoteUrl });
+  }
 
   const commands = inputStream.pipe(
     tap(line => {
