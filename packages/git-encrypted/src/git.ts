@@ -5,6 +5,7 @@ import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { packageLog } from './log';
 import {
   EncryptedRemoteParams,
+  GitBaseOfflineParams,
   GitBaseParams,
   GitBaseParamsEncrypted,
 } from './types';
@@ -169,6 +170,17 @@ export const getAllObjectIdsStartingAtCommit = async (
   });
 
   return objectIds;
+};
+
+export const isEmptyRepo = async ({ fs, gitdir }: GitBaseOfflineParams) => {
+  try {
+    await git.log({ fs, gitdir, depth: 1 });
+  } catch (error) {
+    if (error instanceof git.Errors.NotFoundError) {
+      return true;
+    }
+  }
+  return false;
 };
 
 const logE = log.extend('encryptedRepoAddAndPush');
