@@ -6,35 +6,59 @@ implied.
 
 ## Usage
 
-### Git
+Firstly, install the package:
 
 ```sh
-npm --global install git-remote-encrypted
+npm -g install git-remote-encrypted
 ```
 
-```sh
-KEYS_PATH="~/.private/keys" git add remote encrypted::git@github.com/user/repo.git#main
-```
+### Experiment
 
-Or pass the keys directly.
+Then, to experiment with this proof-of-concept, you can first push to an
+encrypted repository, and then pull from it into another location.
 
-```sh
-git add remote encrypted::git@github.com/user/repo.git#main::KEY1:KEY2:KEY3:KEY4
-```
+To **push** to a new repository:
 
-### JavaScript (or TypeScript)
+- Create a new empty repository on your favourite host (GitHub is fine)
+- Create a local repo
+  - `mkdir testing-encrypted-git`
+  - `cd testing-encrypted-git`
+  - `git init .`
+  - `git remote add enc encrypted::git@github.com:user/repo.git`
+    - Or swap this for your any other git url prefixed with `encrypted::`
+  - Add some files, commit
+    - `echo testing > testing && git add testing && git commit -m 'it works!!'`
+- Push as normal
+  - `git push -u enc master`
+- Now check the repo on GitHub
+  - Behold encrypted content
 
-```typescript
-import git from 'git-remote-encrypted';
-import fs from 'fs';
+NOTE: Your encryption keys have been saved in plain text inside `.git` at:
+`testing-encrypted-git/.git/encrypted-keys/keys.json`. They're in plain text,
+this is a proof-of-concept.
 
-// Assuming this is an exisitng git repository
-const dir = process.cwd();
+Then to **pull** from your encrypted repository:
 
-git.encrypted.clone({ fs, dir, url, keys });
-git.encrypted.pull({ fs, dir, remote: 'origin', keys });
-git.encrypted.push({ fs, dir, remote: 'origin', keys });
-```
+- Create a new local repo
+  - `mkdir testing-decrypted-git`
+  - `cd testing-decrypted-git`
+  - `git init .`
+  - `git remote add enc encrypted::git@github.com:user/repo.git`
+    - Or swap this for your any other git url prefixed with `encrypted::`
 
-If you try to push to an encrypted remote with isomorphic-git, it will fail,
-as isomorphic-git doesn't know how to handle the `encrypted::` url.
+* Restore your keys
+  - `mkdir .git/encrypted-keys`
+  - Copy the JSON keys into `.git/encrypted-keys/keys.json`
+
+- Pull as normal
+  - `git pull enc master`
+  - `git branch -u enc/master`
+- Behold decrypted content
+
+## Ntes
+
+- Your remote backup is useless without the keys. You are reponsible for
+  saving them somewhere.
+- This software is extremely experimental, do not rely on it for anything
+  important. There are probably gaping holes in the crypto. Issues or PRs
+  welcome.
