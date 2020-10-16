@@ -8,6 +8,8 @@ export const REFS_DIR = 'refs';
 export const ENCRYPTED_KEYS_DIR = 'encrypted-keys' as const;
 export const KEYS_FILENAME = 'keys.json' as const;
 
+export const ENCRYPTED_REMOTE_NAME = 'encryptedRemote';
+
 export const REF_OID = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 
 export const { nonceLength: NONCE_LENGTH } = secretbox;
@@ -23,8 +25,7 @@ export const GIT_ENCRYPTED_AUTHOR = {
 export const GIT_ENCRYPTED_MESSAGE = 'Encrypted push' as const;
 
 export const DEFAULT_KEYS: KEYS = {
-  secret: decodeBase64('OTdY2G5jOtUb4NkTIrcMic5Om2FSGVNr+mOV21bMfkY='),
-  secretNonce: decodeBase64('wIfKspQFPMhcpxWSNO/d/aA50ErheC6t'),
-  filenames: decodeBase64('aeFYzTwOrPbAPu7Lyw1QZ34JglphbLTgAAHtjr2Zcps='),
-  filenamesNonce: decodeBase64('JbTmJEJIT3fx2agUFmLFkb0Zk60/Eeoa'),
+  content: decodeBase64('OTdY2G5jOtUb4NkTIrcMic5Om2FSGVNr+mOV21bMfkY='),
+  filename: decodeBase64('aeFYzTwOrPbAPu7Lyw1QZ34JglphbLTgAAHtjr2Zcps='),
+  salt: decodeBase64('JbTmJEJIT3fx2agUFmLFkb0Zk60/Eeoa'),
 };

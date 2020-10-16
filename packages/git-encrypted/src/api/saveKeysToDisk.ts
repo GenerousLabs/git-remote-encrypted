@@ -8,13 +8,13 @@ import {
 
 export const saveKeysToDisk = async ({
   fs,
-  gitDir,
+  gitdir,
   keys,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitDir'> & { keys: KEYS }) => {
-  const keysDir = getEncryptedKeysDir({ gitDir });
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & { keys: KEYS }) => {
+  const keysDir = getEncryptedKeysDir({ gitdir });
   ensureDirectoryExists({ fs, path: keysDir });
 
-  const keysPath = getKeysPath({ gitDir });
+  const keysPath = getKeysPath({ gitdir });
   const keysString = keysToString({ keys });
   const json = JSON.stringify(keysString);
   await fs.promises.writeFile(keysPath, json, { encoding: 'utf8' });

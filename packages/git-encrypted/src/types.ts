@@ -1,6 +1,13 @@
 import fs from 'fs';
 import { HttpClient } from 'isomorphic-git';
 
+// NOTE: These types are the same as in the `git-remote-helper` package, but not
+// imported from there because we don't want to depend on the remote helper in
+// the browser. Also, we don't strictly speaking need to keep the same API. The
+// two APIs might diverge over time.
+export type PushRef = { src: string; dst: string; force: boolean };
+export type FetchRef = { ref: string; oid: string };
+
 export type FS = {
   promises: {
     readFile: typeof fs.promises.readFile;
@@ -25,21 +32,19 @@ export type GitBaseParams = {
   /**
    * The full, absolute, path to the git directory (usually `repo/.git`).
    */
-  gitDir: string;
+  gitdir: string;
   /**
    * The http client to pass to isomorphic-git. Can from one of these two:
    * import http from 'isomorphic-git/http/node';
    * import http from 'isomorphic-git/http/web';
    */
   http: HttpClient;
-  corsProxy: string;
-  gitPull: EncryptedPushPull;
-  gitPush: EncryptedPushPull;
+  corsProxy?: string;
 };
 
 export type GetKeys = () => Promise<KEYS>;
 
-export type GitBaseParamsEncrypted = GitBaseParams & {
+export type GitBaseParamsWithGetKeys = GitBaseParams & {
   /**
    * An async helper to return the keys. An example is exported which fetches
    * the keys from disk.
@@ -47,32 +52,55 @@ export type GitBaseParamsEncrypted = GitBaseParams & {
   getKeys: GetKeys;
 };
 
+export type GitApi = {
+  clone: EncryptedPushPull;
+  pull: EncryptedPushPull;
+  push: EncryptedPushPull;
+};
+
+export type GitBaseParamsEncrypted = GitBaseParamsWithGetKeys & {
+  gitApi: GitApi;
+};
+
 export type RemoteUrl = {
   /**
    * The remote URL provided from the native git client
-   * eg: `encrypted::git@host|https://#branchname`
+   * eg: `git@host|https://#branchname`
+   *
+   * NOTE: This has the leading `encrypted::` part stripped
    */
   remoteUrl: string;
 };
 
 // export type EncryptedPushParams = RemoteUrl & Pick<GitBaseParamsEncrypted, 'encryptedDir'>;
 
+export type EncryptedRemoteParams = {
+  /**
+   * The encrypted remote URL, as it should be passed to git. So already
+   * stripped of all the `encrypted::` prefix and the `#main` branch suffix.
+   */
+  encryptedRemoteUrl: string;
+  /**
+   * The single branch on the `encryptedRemote` that we pull from / push to.
+   */
+  // Disable the remote branch for now, it's complicated
+  // encryptedRemoteBranch: string;
+};
+
 export type EncryptedPushPull = (
-  params: Omit<GitBaseParams, 'gitDir' | 'gitPull' | 'gitPush'> & {
-    /**
-     * The full path to the encrypted repo directory
-     */
-    encryptedDir: string;
-    /**
-     * The encrypted remote URL, as it should be passed to git. So already
-     * stripped of all the `encrypted::` prefix and the `#main` branch suffix.
-     */
-    encryptedRemoteUrl: string;
-    /**
-     * The single branch on the `encryptedRemote` that we pull from / push to.
-     */
-    encryptedRemoteBranch: string;
-  }
+  params: Omit<GitBaseParams, 'gitdir'> &
+    EncryptedRemoteParams & {
+      /**
+       * The full path to the encrypted repo directory
+       */
+      encryptedDir: string;
+      /**
+       * Defaults to `true`, but if set to `false` the handler will silently *
+       * swallow errors. This is helpful for some operations which are not
+       * strictly necessary.
+       */
+      throwOnError?: boolean;
+    }
 ) => Promise<void>;
 
 export type KEYS = {
@@ -82,3 +110,10 @@ export type KEYS = {
 };
 
 export type KEYS_STRINGS = Record<keyof KEYS, string>;
+
+type Ref = string;
+type ObjectId = string;
+export type RefPair = [Ref, ObjectId];
+export type RefsMap = {
+  [ref: string]: string;
+};

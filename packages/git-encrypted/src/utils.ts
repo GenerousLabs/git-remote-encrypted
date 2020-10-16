@@ -92,37 +92,53 @@ export const unwrap = (input: Uint8Array | Buffer) => {
   };
 };
 
-export const getEncryptedDir = ({ gitDir }: Pick<GitBaseParams, 'gitDir'>) => {
-  return join(gitDir, ENCRYPTED_DIR);
+export const getEncryptedDir = ({ gitdir }: Pick<GitBaseParams, 'gitdir'>) => {
+  return join(gitdir, ENCRYPTED_DIR);
+};
+
+export const getEncryptedGitDir = ({
+  gitdir,
+}: Pick<GitBaseParams, 'gitdir'>) => {
+  const encryptedDir = getEncryptedDir({ gitdir });
+  return join(encryptedDir, '.git');
 };
 
 export const getEncryptedObjectsDir = ({
-  gitDir,
-}: Pick<GitBaseParams, 'gitDir'>) => {
-  const encryptedDir = getEncryptedDir({ gitDir });
+  gitdir,
+}: Pick<GitBaseParams, 'gitdir'>) => {
+  const encryptedDir = getEncryptedDir({ gitdir });
   return join(encryptedDir, OBJECTS_DIR);
 };
 
 export const getEncryptedRefsDir = ({
-  gitDir,
-}: Pick<GitBaseParams, 'gitDir'>) => {
-  const encryptedDir = getEncryptedDir({ gitDir });
+  gitdir,
+}: Pick<GitBaseParams, 'gitdir'>) => {
+  const encryptedDir = getEncryptedDir({ gitdir });
   return join(encryptedDir, REFS_DIR);
 };
 
 export const getEncryptedKeysDir = ({
-  gitDir,
-}: Pick<GitBaseParams, 'gitDir'>) => {
-  return join(gitDir, ENCRYPTED_KEYS_DIR);
+  gitdir,
+}: Pick<GitBaseParams, 'gitdir'>) => {
+  return join(gitdir, ENCRYPTED_KEYS_DIR);
 };
 
-export const getKeysPath = ({ gitDir }: Pick<GitBaseParams, 'gitDir'>) => {
-  const keysDir = getEncryptedKeysDir({ gitDir });
+export const getKeysPath = ({ gitdir }: Pick<GitBaseParams, 'gitdir'>) => {
+  const keysDir = getEncryptedKeysDir({ gitdir });
   return join(keysDir, KEYS_FILENAME);
 };
 
 export const parseGitRemoteUrl = ({ remoteUrl }: RemoteUrl) => {
-  const [, urlWithBranch] = remoteUrl.split('::');
-  const [url, branch] = urlWithBranch.split('#');
+  return { url: remoteUrl };
+  // Disabling support for remote branches for now
+  const [url, branch] = remoteUrl.split('#');
+  if (
+    typeof url !== 'string' ||
+    url.length === 0 ||
+    typeof branch !== 'string' ||
+    branch.length === 0
+  ) {
+    throw new Error('Invalid encrypted remote URL #DfTbCY');
+  }
   return { url, branch };
 };

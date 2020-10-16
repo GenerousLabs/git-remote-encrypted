@@ -1,96 +1,65 @@
-import git from 'isomorphic-git';
-import { DEFAULT_BRANCH_NAME } from '../constants';
 import { packageLog } from '../log';
-import { GitBaseParamsEncrypted } from '../types';
+import {
+  EncryptedRemoteParams,
+  GitBaseParams,
+  GitBaseParamsEncrypted,
+} from '../types';
 import {
   doesDirectoryExist,
   ensureDirectoryExists,
   getEncryptedDir,
+  getEncryptedGitDir,
   getEncryptedKeysDir,
+  getEncryptedObjectsDir,
+  getEncryptedRefsDir,
 } from '../utils';
 
 const log = packageLog.extend('encryptedInit');
 
-export const _initEncryptedRemote = async (
-  params: GitBaseParams & EncryptedRemoteParams
-) => {
-  const { fs, gitDir } = params;
-  const { encryptedRemoteUrl, encryptedRemoteBranch, ...base } = params;
+const ensureDirectoriesExist = async ({
+  fs,
+  gitdir,
+}: Pick<GitBaseParams, 'fs' | 'gitdir'>) => {
+  const encryptedObjectsDir = getEncryptedObjectsDir({ gitdir });
+  await ensureDirectoryExists({ fs, path: encryptedObjectsDir });
 
-  // In this context, we're working 100% in the encrypted repo, so set the
-  // encrypted dir to dir for convenience.
-  const dir = getEncryptedDir({ gitDir });
+  const encryptedKeysDir = getEncryptedKeysDir({ gitdir });
+  await ensureDirectoryExists({ fs, path: encryptedKeysDir });
 
-  log(
-    'Setting encryptedRemote #9FObFR',
-    JSON.stringify({ encryptedDir: dir, encryptedRemoteUrl })
-  );
-
-  const remotes = await git.listRemotes({ fs, dir });
-
-  const encryptedRemote = remotes.find(
-    remote => remote.remote === ENCRYPTED_REMOTE_NAME
-  );
-
-  if (typeof encryptedRemote === 'undefined') {
-    // The remote does not exist, so create it now
-    await git.addRemote({
-      fs,
-      dir,
-      remote: ENCRYPTED_REMOTE_NAME,
-      url: encryptedRemoteUrl,
-      force: true,
-    });
-
-    // Does the target branch exist on the remote? If not, this could be an empty repo
-    const remoteBranches = await git.listServerRefs({
-      ...base,
-      url: encryptedRemoteUrl,
-    });
-
-    const remoteBranch = remoteBranches.find(ref => {
-      const branchName = ref.ref.replace('refs/heads/', '');
-      return branchName === encryptedRemoteBranch;
-    });
-
-    if (typeof remoteBranch === 'undefined') {
-      // This is a new remote repo, nothing else to do
-      return;
-    }
-  }
-
-  // NOTE: By passing `force: true` here, we can ensure that the remote url is
-  // always overwritten
-  await git.addRemote({
-    fs,
-    dir,
-    remote: ENCRYPTED_REMOTE_NAME,
-    url: encryptedRemoteUrl,
-    force: true,
-  });
+  const encryptedRefsDir = getEncryptedRefsDir({ gitdir });
+  await ensureDirectoryExists({ fs, path: encryptedRefsDir });
 };
 
 /**
  * Create a new encrypted remote.
  */
-export const encryptedInit = async ({
-  fs,
-  gitDir,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitDir'>) => {
-  log('Invoked #rv3T39', JSON.stringify({ gitDir }));
-  const encryptedKeysDir = getEncryptedKeysDir({ gitDir });
-  await ensureDirectoryExists({ fs, path: encryptedKeysDir });
+export const encryptedInit = async (
+  params: GitBaseParamsEncrypted & EncryptedRemoteParams
+) => {
+  const { fs, gitdir } = params;
+  const { gitApi, getKeys, ...base } = params;
 
-  const encryptedDir = getEncryptedDir({ gitDir });
+  log('Invoked #rv3T39', JSON.stringify({ gitdir }));
 
-  if (await doesDirectoryExist({ fs, path: encryptedDir })) {
+  const encryptedDir = getEncryptedDir({ gitdir });
+  await ensureDirectoryExists({ fs, path: encryptedDir });
+
+  const encryptedGitDir = getEncryptedGitDir({ gitdir });
+
+  // TODO Add key init here
+
+  // If the `encrypted/.git` directory exists, then we assume the repository has
+  // already been initialised.
+  if (await doesDirectoryExist({ fs, path: encryptedGitDir })) {
     log('Repo was already initialised #Aq1RnX');
+    await ensureDirectoriesExist({ fs, gitdir });
     return;
   }
 
-  await ensureDirectoryExists({ fs, path: encryptedDir });
+  await gitApi.clone({ ...base, encryptedDir });
 
-  await git.init({ fs, dir: encryptedDir, defaultBranch: DEFAULT_BRANCH_NAME });
-
+  // NOTE: We need to run this AFTER the clone because otherwise git complains
+  // of trying to clone into a not empty directory.
+  await ensureDirectoriesExist({ fs, gitdir });
   log('Successfully initialised encrypted repo #Gz9igq');
 };
