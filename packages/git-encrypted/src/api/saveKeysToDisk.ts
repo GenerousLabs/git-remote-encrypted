@@ -12,7 +12,7 @@ export const saveKeysToDisk = async ({
   keys,
 }: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & { keys: KEYS }) => {
   const keysDir = getEncryptedKeysDir({ gitdir });
-  ensureDirectoryExists({ fs, path: keysDir });
+  await ensureDirectoryExists({ fs, path: keysDir });
 
   const keysPath = getKeysPath({ gitdir });
   const keysString = keysToString({ keys });
