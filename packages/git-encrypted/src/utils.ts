@@ -131,6 +131,7 @@ export const getKeysPath = ({ gitdir }: Pick<GitBaseParams, 'gitdir'>) => {
 export const parseGitRemoteUrl = ({ remoteUrl }: RemoteUrl) => {
   return { url: remoteUrl };
   // Disabling support for remote branches for now
+  /*
   const [url, branch] = remoteUrl.split('#');
   if (
     typeof url !== 'string' ||
@@ -141,4 +142,5 @@ export const parseGitRemoteUrl = ({ remoteUrl }: RemoteUrl) => {
     throw new Error('Invalid encrypted remote URL #DfTbCY');
   }
   return { url, branch };
+  */
 };
