@@ -1,7 +1,6 @@
 import { copyAllEncryptedObjectsToSourceRepo } from '../objects';
 import { GitBaseParamsEncrypted, RemoteUrl } from '../types';
 import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
-import { encryptedInit } from './encryptedInit';
 
 export const encryptedFetch = async (
   params: GitBaseParamsEncrypted & RemoteUrl
@@ -11,11 +10,6 @@ export const encryptedFetch = async (
 
   const encryptedDir = getEncryptedDir({ gitdir });
   const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
-
-  // We need to re-run the initialisation on every push because a user can `git
-  // add remote ...` and then immediately `git push`. We have no way of knowing
-  // if the encrypted repo has been initialised or not.
-  await encryptedInit({ ...params, encryptedRemoteUrl });
 
   // When the source repo is pulling from the encrypted repo, first we need to
   // pull from the encryptedRemote to ensure that we have the latest objects.

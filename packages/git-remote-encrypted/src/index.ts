@@ -4,6 +4,7 @@ import fs from 'fs';
 import {
   DEFAULT_KEYS,
   encryptedFetch,
+  encryptedInit,
   encryptedPush,
   EncryptedPushResult,
   getRefsGitString,
@@ -16,6 +17,7 @@ import { packageLog } from './log';
 globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
 const log = packageLog.extend('cli');
+const logInit = log.extend('init');
 const logList = log.extend('list');
 const logPush = log.extend('push');
 const logFetch = log.extend('fetch');
@@ -32,13 +34,27 @@ GitRemoteHelper({
   stdin: process.stdin,
   stdout: process.stdout,
   api: {
-    list: async ({ gitdir, forPush, refs, remoteUrl }) => {
+    init: async ({ gitdir, remoteUrl, remoteName }) => {
+      logInit(
+        'Invoked #raSclb',
+        JSON.stringify({ gitdir, remoteUrl, remoteName })
+      );
+
+      // We always need to call `encryptedInit()` before running any other
+      // operations. By calling it here we can ensure that it's only called once
+      // per invocation of the git-remote-helper.
+      await encryptedInit({
+        ...baseGitParams,
+        gitdir,
+        encryptedRemoteUrl: remoteUrl,
+      });
+    },
+    list: async ({ gitdir, forPush, refs }) => {
       logList('Got list command #VJhzH4', gitdir, forPush, refs);
 
       const refsString = await getRefsGitString({
         ...baseGitParams,
         gitdir,
-        remoteUrl,
       });
 
       // In the event of an empty string, return just one newline

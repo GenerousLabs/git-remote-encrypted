@@ -9,7 +9,6 @@ import { copySourceObjectToEncryptedRepo } from '../objects';
 import { writeEncryptedRef } from '../refs';
 import { GitBaseParamsEncrypted, PushRef, RemoteUrl } from '../types';
 import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
-import { encryptedInit } from './encryptedInit';
 import { getEncryptedRefObjectId } from './getEncryptedRefObjectId';
 
 const log = packageLog.extend('encryptedPush');
@@ -32,14 +31,6 @@ export const encryptedPush = async (
   const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
 
   log('Invoked #kGvMKs', JSON.stringify({ gitdir, encryptedRemoteUrl }));
-
-  // We need to re-run the initialisation on every push because a user can `git
-  // add remote ...` and then immediately `git push`. We have no way of knowing
-  // if the encrypted repo has been initialised or not.
-  await encryptedInit({
-    ...params,
-    encryptedRemoteUrl,
-  });
 
   // Before we start running the PUSH, paradoxically, we need to first PULL. To
   // handle a push from the source repo into the encrypted repo we first need to
