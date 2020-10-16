@@ -14,6 +14,9 @@ export const getKeysFromDisk = async ({
     return keys;
   } catch (error) {
     console.error('FATAL: Failed to load keys. #TGIwoU');
-    process.exit();
+    if (typeof process !== 'undefined' && typeof process.exit === 'function') {
+      process.exit();
+    }
+    throw error;
   }
 };
