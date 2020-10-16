@@ -145,3 +145,21 @@ export const decryptFile = async ({
 
   return [decryptedFilename, decryptedContents];
 };
+
+export const decryptFileContentsOnly = async ({
+  fileContents,
+  keys,
+}: {
+  fileContents: Uint8Array;
+  keys: KEYS;
+}) => {
+  const [nonce, encryptedContents] = split(fileContents, NONCE_LENGTH);
+
+  const decryptedContents = await decrypt(
+    encryptedContents,
+    nonce,
+    keys.content
+  );
+
+  return decryptedContents;
+};

@@ -1,11 +1,12 @@
+import { copyAllEncryptedObjectsToSourceRepo } from '../objects';
 import { GitBaseParamsEncrypted, RemoteUrl } from '../types';
 import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
 import { encryptedInit } from './encryptedInit';
 
-export const encryptedPull = async (
+export const encryptedFetch = async (
   params: GitBaseParamsEncrypted & RemoteUrl
 ) => {
-  const { remoteUrl } = params;
+  const { remoteUrl, getKeys, fs } = params;
   const { gitdir, gitApi, ...base } = params;
 
   const encryptedDir = getEncryptedDir({ gitdir });
@@ -25,5 +26,11 @@ export const encryptedPull = async (
     // encryptedRemoteBranch: branch,
   });
 
+  const keys = await getKeys();
+
   // Decrypt objects and load them into the source repo
+  // TODO Decide how to decrypt objects
+  // - We could decrypt one at a time, parse it, and then find its children
+  // - We could also just decrypt every object we have
+  await copyAllEncryptedObjectsToSourceRepo({ fs, gitdir, keys });
 };

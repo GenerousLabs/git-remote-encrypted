@@ -24,7 +24,20 @@ export type FS = {
   };
 };
 
-export type GitBaseParams = {
+export type GitBaseHttpParams = {
+  /**
+   * The http client to pass to isomorphic-git. Can from one of these two:
+   * import http from 'isomorphic-git/http/node';
+   * import http from 'isomorphic-git/http/web';
+   */
+  http: HttpClient;
+  /**
+   * An optional corsProxy as defined by isomorphic-git
+   */
+  corsProxy?: string;
+};
+
+export type GitBaseOfflineParams = {
   /**
    * The filesystem instance for isomorphic-git. Can be node's fs, a LightningFS
    * instance, or otherwise. */
@@ -33,14 +46,9 @@ export type GitBaseParams = {
    * The full, absolute, path to the git directory (usually `repo/.git`).
    */
   gitdir: string;
-  /**
-   * The http client to pass to isomorphic-git. Can from one of these two:
-   * import http from 'isomorphic-git/http/node';
-   * import http from 'isomorphic-git/http/web';
-   */
-  http: HttpClient;
-  corsProxy?: string;
 };
+
+export type GitBaseParams = GitBaseHttpParams & GitBaseOfflineParams;
 
 export type GetKeys = () => Promise<KEYS>;
 

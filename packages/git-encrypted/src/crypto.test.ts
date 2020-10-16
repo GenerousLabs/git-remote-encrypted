@@ -6,6 +6,7 @@ import {
   encryptFile,
   encryptFilename,
   split,
+  decryptFileContentsOnly,
 } from './crypto';
 import { KEYS } from './types';
 
@@ -74,6 +75,23 @@ describe('crypto', () => {
       expect(originalName).toEqual(exampleFilename);
       expect(originalBody).toEqual(exampleArray);
       expect(name).toEqual(exampleEncryptedFilename);
+    });
+  });
+
+  describe('decryptFileContentsOnly()', () => {
+    it('Decrypts a known value #T8Co26', async () => {
+      const [, contents] = await encryptFile({
+        filename: exampleFilename,
+        contents: exampleArray,
+        keys,
+      });
+
+      const decrypted = await decryptFileContentsOnly({
+        fileContents: contents,
+        keys,
+      });
+
+      expect(decrypted).toEqual(exampleArray);
     });
   });
 });

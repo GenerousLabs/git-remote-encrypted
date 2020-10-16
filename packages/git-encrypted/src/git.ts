@@ -3,7 +3,11 @@ import git, { ReadCommitResult } from 'isomorphic-git';
 import { last } from 'remeda';
 import { GIT_ENCRYPTED_AUTHOR, GIT_ENCRYPTED_MESSAGE } from './constants';
 import { packageLog } from './log';
-import { GitBaseParams } from './types';
+import {
+  EncryptedRemoteParams,
+  GitBaseParams,
+  GitBaseParamsEncrypted,
+} from './types';
 import { getEncryptedDir } from './utils';
 
 /**
@@ -217,4 +221,26 @@ export const encryptedRepoCommit = async (params: GitBaseParams) => {
   logE('Created new encrypted repo commit #7SOC1A');
 
   return true;
+};
+
+export const commitAndPushEncryptedRepo = async (
+  params: Omit<GitBaseParamsEncrypted, 'getKeys'> & EncryptedRemoteParams
+) => {
+  const { gitdir } = params;
+  const { gitApi, ...base } = params;
+
+  // TODO Do the git add, git commit here
+  const newCommitToPush = await encryptedRepoCommit(base);
+
+  const encryptedDir = getEncryptedDir({ gitdir });
+
+  // This pushes the encrypted repo
+  await gitApi.push({
+    ...base,
+    encryptedDir,
+    // If there is no new commit to push, then we don't really care if this push
+    // operation fails
+    throwOnError: !newCommitToPush,
+    // encryptedRemoteBranch,
+  });
 };

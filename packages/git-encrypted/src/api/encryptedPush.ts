@@ -1,15 +1,16 @@
 import Bluebird from 'bluebird';
 import {
-  encryptedRepoCommit,
+  commitAndPushEncryptedRepo,
   getAllObjectIdsStartingAtCommit,
   getSourceObjectIdForRef,
 } from '../git';
 import { packageLog } from '../log';
 import { copySourceObjectToEncryptedRepo } from '../objects';
+import { writeEncryptedRef } from '../refs';
 import { GitBaseParamsEncrypted, PushRef, RemoteUrl } from '../types';
 import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
 import { encryptedInit } from './encryptedInit';
-import { getEncryptedRefObjectId } from './getRefObjectId';
+import { getEncryptedRefObjectId } from './getEncryptedRefObjectId';
 
 const log = packageLog.extend('encryptedPush');
 
@@ -25,8 +26,8 @@ export const encryptedPush = async (
       refs: PushRef[];
     }
 ) => {
-  const { refs, gitdir, remoteUrl, getKeys } = params;
-  const { gitApi, ...gitBaseParams } = params;
+  const { gitdir, getKeys } = params;
+  const { gitApi, remoteUrl, refs, ...gitBaseParams } = params;
   const encryptedDir = getEncryptedDir({ gitdir });
   const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
 
@@ -62,43 +63,83 @@ export const encryptedPush = async (
   // `refs/heads/master` commit in the soruce repo, and then copy all the
   // missing commits (plus all their linked objects) into the encrypted repo,
   // and then update the `refs/heads/master` ref to store the latest objectId.
-  const results = await Bluebird.mapSeries(refs, async ref => {
-    try {
-      // TODO: Figure out how to reject force-pushes without the `force` flag set
-      // to `true`
-      const { src, dst } = ref;
+  const results = await Bluebird.mapSeries(
+    refs,
+    async (
+      ref
+    ): Promise<
+      | (PushRef & {
+          result: EncryptedPushResult.error;
+        })
+      | (PushRef & {
+          result: EncryptedPushResult.nochange | EncryptedPushResult.success;
+          srcCommitId: string;
+        })
+    > => {
+      try {
+        // TODO: Figure out how to reject force-pushes without the `force` flag set
+        // to `true`
+        const { src, dst } = ref;
 
-      const srcCommitId = await getSourceObjectIdForRef({
-        ...gitBaseParams,
-        ref: src,
-      });
+        const srcCommitId = await getSourceObjectIdForRef({
+          ...gitBaseParams,
+          ref: src,
+        });
 
-      const dstCommitId = await getEncryptedRefObjectId({
-        ...gitBaseParams,
-        ref: dst,
-      });
+        const dstCommitId = await getEncryptedRefObjectId({
+          ...gitBaseParams,
+          ref: dst,
+        });
 
-      // If the two commits have the same objectId then there's nothing to do
-      // NOTE: This is unlikely, why did git ask us to make an empty push.
-      // Something potentially went wrong here.
-      if (srcCommitId === dstCommitId) {
-        log('No change push #srBXGz', JSON.stringify({ gitdir, ref }));
-        return { ...ref, result: EncryptedPushResult.nochange };
+        // If the two commits have the same objectId then there's nothing to do
+        // NOTE: This is unlikely, why did git ask us to make an empty push.
+        // Something potentially went wrong here.
+        if (srcCommitId === dstCommitId) {
+          log('No change push #srBXGz', JSON.stringify({ gitdir, ref }));
+          return {
+            ...ref,
+            srcCommitId,
+            result: EncryptedPushResult.nochange,
+          };
+        }
+
+        await getAllObjectIdsStartingAtCommit({
+          ...gitBaseParams,
+          startAtCommitId: srcCommitId,
+          stopAtCommitId: dstCommitId,
+          objectIds: objectIdsToCopyToEncrypted,
+        });
+
+        return {
+          ...ref,
+          srcCommitId,
+          result: EncryptedPushResult.success,
+        };
+      } catch (error) {
+        log('Error during source to encrypted push #cDTH0X', error);
+        return { ...ref, result: EncryptedPushResult.error };
       }
-
-      await getAllObjectIdsStartingAtCommit({
-        ...gitBaseParams,
-        startAtCommitId: srcCommitId,
-        stopAtCommitId: dstCommitId,
-        objectIds: objectIdsToCopyToEncrypted,
-      });
-
-      return { ...ref, result: EncryptedPushResult.success };
-    } catch (error) {
-      log('Error during source to encrypted push #cDTH0X', error);
-      return { ...ref, result: EncryptedPushResult.error };
     }
-  });
+  );
+
+  // If the operation succeeded, then write the encrypted ref
+  const writeRefsAndCommitAndPush = async () => {
+    await Bluebird.each(results, result => {
+      if (result.result !== EncryptedPushResult.error) {
+        writeEncryptedRef({
+          ...gitBaseParams,
+          ref: result.dst,
+          objectId: result.srcCommitId,
+        });
+      }
+    });
+
+    await commitAndPushEncryptedRepo({
+      ...gitBaseParams,
+      gitApi,
+      encryptedRemoteUrl,
+    });
+  };
 
   // After checking all the requested push refs, copy any new objects
   if (objectIdsToCopyToEncrypted.size === 0) {
@@ -108,6 +149,7 @@ export const encryptedPush = async (
       'Found no new objects during encryptedPush() #Nj2g88',
       JSON.stringify({ gitdir, refs })
     );
+    await writeRefsAndCommitAndPush();
     return results;
   }
 
@@ -116,22 +158,7 @@ export const encryptedPush = async (
   await Bluebird.each(objectIdsToCopyToEncrypted, async objectId => {
     await copySourceObjectToEncryptedRepo({ ...gitBaseParams, keys, objectId });
   });
-
-  // TODO Do the git add, git commit here
-  const newCommitToPush = await encryptedRepoCommit({
-    ...gitBaseParams,
-  });
-
-  // This pushes the encrypted repo
-  await gitApi.push({
-    ...gitBaseParams,
-    encryptedDir,
-    encryptedRemoteUrl,
-    // If there is no new commit to push, then we don't really care if this push
-    // operation fails
-    throwOnError: !newCommitToPush,
-    // encryptedRemoteBranch,
-  });
+  await writeRefsAndCommitAndPush();
 
   return results;
 };
