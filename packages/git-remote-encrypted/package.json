@@ -1,27 +1,28 @@
 {
   "version": "0.1.0",
   "license": "AGPL-3.0-or-later",
-  "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
+    "cli",
     "src"
   ],
+  "bin": "cli/index.js",
   "engines": {
     "node": ">=10"
   },
   "scripts": {
-    "start": "concurrently -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" yarn:watch:*",
+    "start": "yarn run watch:ncc",
     "watch:tsdx": "tsdx watch --verbose",
-    "watch:ncc": "ncc build -e debug -e tslib -w src/index.ts -o dist/cli/",
-    "build": "concurrently yarn:build:*",
+    "watch:ncc": "ncc build -e debug -e tslib -w src/index.ts -o cli/",
+    "build": "yarn run build:ncc",
     "build:tsdx": "tsdx build",
-    "build:ncc": "ncc build -e debug -e tslib src/index.ts -o dist/cli/",
+    "build:ncc": "ncc build -e debug -e tslib src/index.ts -o cli/",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
     "size": "size-limit",
-    "analyze": "size-limit --why"
+    "analyze": "size-limit --why",
+    "prepublish": "yarn run lint && yarn run test && yarn run size && yarn run build"
   },
   "peerDependencies": {},
   "prettier": {
@@ -32,7 +33,6 @@
   },
   "name": "git-remote-encrypted",
   "author": "Generous Labs",
-  "module": "dist/git-remote-encrypted.esm.js",
   "size-limit": [
     {
       "path": "dist/git-remote-encrypted.cjs.production.min.js",
