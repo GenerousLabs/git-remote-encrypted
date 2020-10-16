@@ -11,6 +11,65 @@ import {
 
 const log = packageLog.extend('encryptedInit');
 
+export const _initEncryptedRemote = async (
+  params: GitBaseParams & EncryptedRemoteParams
+) => {
+  const { fs, gitDir } = params;
+  const { encryptedRemoteUrl, encryptedRemoteBranch, ...base } = params;
+
+  // In this context, we're working 100% in the encrypted repo, so set the
+  // encrypted dir to dir for convenience.
+  const dir = getEncryptedDir({ gitDir });
+
+  log(
+    'Setting encryptedRemote #9FObFR',
+    JSON.stringify({ encryptedDir: dir, encryptedRemoteUrl })
+  );
+
+  const remotes = await git.listRemotes({ fs, dir });
+
+  const encryptedRemote = remotes.find(
+    remote => remote.remote === ENCRYPTED_REMOTE_NAME
+  );
+
+  if (typeof encryptedRemote === 'undefined') {
+    // The remote does not exist, so create it now
+    await git.addRemote({
+      fs,
+      dir,
+      remote: ENCRYPTED_REMOTE_NAME,
+      url: encryptedRemoteUrl,
+      force: true,
+    });
+
+    // Does the target branch exist on the remote? If not, this could be an empty repo
+    const remoteBranches = await git.listServerRefs({
+      ...base,
+      url: encryptedRemoteUrl,
+    });
+
+    const remoteBranch = remoteBranches.find(ref => {
+      const branchName = ref.ref.replace('refs/heads/', '');
+      return branchName === encryptedRemoteBranch;
+    });
+
+    if (typeof remoteBranch === 'undefined') {
+      // This is a new remote repo, nothing else to do
+      return;
+    }
+  }
+
+  // NOTE: By passing `force: true` here, we can ensure that the remote url is
+  // always overwritten
+  await git.addRemote({
+    fs,
+    dir,
+    remote: ENCRYPTED_REMOTE_NAME,
+    url: encryptedRemoteUrl,
+    force: true,
+  });
+};
+
 /**
  * Create a new encrypted remote.
  */
