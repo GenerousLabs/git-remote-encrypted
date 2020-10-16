@@ -106,4 +106,7 @@ GitRemoteHelper({
       return outputString + '\n\n';
     },
   },
+}).catch(error => {
+  console.error('GitRemoteHelper ERROR #W9flRj');
+  console.error(error);
 });
