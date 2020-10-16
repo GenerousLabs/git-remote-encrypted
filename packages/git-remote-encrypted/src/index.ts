@@ -2,11 +2,11 @@
 
 import fs from 'fs';
 import {
-  DEFAULT_KEYS,
   encryptedFetch,
   encryptedInit,
   encryptedPush,
   EncryptedPushResult,
+  getKeysFromDisk,
   getRefsGitString,
   nodeGitApi as gitApi,
 } from 'git-encrypted';
@@ -25,7 +25,6 @@ const logFetch = log.extend('fetch');
 const baseGitParams = {
   fs,
   http,
-  getKeys: async () => DEFAULT_KEYS,
   gitApi,
 };
 
@@ -52,8 +51,11 @@ GitRemoteHelper({
     list: async ({ gitdir, forPush, refs }) => {
       logList('Got list command #VJhzH4', gitdir, forPush, refs);
 
+      const keys = await getKeysFromDisk({ fs, gitdir });
+
       const refsString = await getRefsGitString({
         ...baseGitParams,
+        keys,
         gitdir,
       });
 
@@ -67,8 +69,11 @@ GitRemoteHelper({
     handleFetch: async ({ gitdir, refs, remoteUrl }) => {
       logFetch('handleFetch() invoked #nGa2WK', JSON.stringify({ refs }));
 
+      const keys = await getKeysFromDisk({ fs, gitdir });
+
       await encryptedFetch({
         ...baseGitParams,
+        keys,
         gitdir,
         remoteUrl,
       });
@@ -80,8 +85,11 @@ GitRemoteHelper({
     handlePush: async ({ refs, gitdir, remoteUrl }) => {
       logPush('handlePush() invoked #Fl6g38');
 
+      const keys = await getKeysFromDisk({ fs, gitdir });
+
       const results = await encryptedPush({
         ...baseGitParams,
+        keys,
         gitdir,
         remoteUrl,
         refs,

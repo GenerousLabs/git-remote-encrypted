@@ -1,6 +1,4 @@
 import { secretbox } from 'tweetnacl';
-import { decodeBase64 } from 'tweetnacl-util';
-import { KEYS } from './types';
 
 export const ENCRYPTED_DIR = 'encrypted' as const;
 export const OBJECTS_DIR = 'objects';
@@ -23,9 +21,3 @@ export const GIT_ENCRYPTED_AUTHOR = {
   name: 'Encryption',
 } as const;
 export const GIT_ENCRYPTED_MESSAGE = 'Encrypted push' as const;
-
-export const DEFAULT_KEYS: KEYS = {
-  content: decodeBase64('OTdY2G5jOtUb4NkTIrcMic5Om2FSGVNr+mOV21bMfkY='),
-  filename: decodeBase64('aeFYzTwOrPbAPu7Lyw1QZ34JglphbLTgAAHtjr2Zcps='),
-  salt: decodeBase64('JbTmJEJIT3fx2agUFmLFkb0Zk60/Eeoa'),
-};

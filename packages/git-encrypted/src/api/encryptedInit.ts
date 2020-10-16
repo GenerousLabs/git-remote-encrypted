@@ -37,10 +37,10 @@ const ensureDirectoriesExist = async ({
  * Create a new encrypted remote.
  */
 export const encryptedInit = async (
-  params: GitBaseParamsEncrypted & EncryptedRemoteParams
+  params: Omit<GitBaseParamsEncrypted, 'keys'> & EncryptedRemoteParams
 ) => {
   const { fs, gitdir } = params;
-  const { gitApi, getKeys, ...base } = params;
+  const { gitApi, ...base } = params;
 
   log('Invoked #rv3T39', JSON.stringify({ gitdir }));
 

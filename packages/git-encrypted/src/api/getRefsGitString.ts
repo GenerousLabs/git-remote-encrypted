@@ -1,11 +1,11 @@
 import { packageLog } from '../log';
 import { getEncryptedRefPairs, refPairsToGitString } from '../refs';
-import { GetKeys, GitBaseOfflineParams } from '../types';
+import { GitBaseOfflineParams, KEYS } from '../types';
 
 const log = packageLog.extend('getRefsGitString');
 
 export const getRefsGitString = async (
-  params: GitBaseOfflineParams & { getKeys: GetKeys }
+  params: GitBaseOfflineParams & { keys: KEYS }
 ) => {
   const refPairs = await getEncryptedRefPairs(params);
   const refsString = refPairsToGitString({ refPairs });

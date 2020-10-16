@@ -25,9 +25,8 @@ export const refPairsToGitString = ({ refPairs }: { refPairs: RefPair[] }) => {
 export const getEncryptedRefPairs = async ({
   fs,
   gitdir,
-  getKeys,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'getKeys'>) => {
-  const keys = await getKeys();
+  keys,
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'keys'>) => {
   const encryptedRefsDir = getEncryptedRefsDir({ gitdir });
   const encryptedRefFileNames = await fs.promises.readdir(encryptedRefsDir);
   const refPairs = await Bluebird.map(
@@ -74,11 +73,10 @@ export const readEncryptedRef = async ({
   fs,
   gitdir,
   ref,
-  getKeys,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'getKeys'> & {
+  keys,
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'keys'> & {
   ref: string;
 }) => {
-  const keys = await getKeys();
   const encryptedRefsDir = getEncryptedRefsDir({ gitdir });
   const encryptedRefFilename = await getEncryptedRefFilename({ keys, ref });
   const path = join(encryptedRefsDir, encryptedRefFilename);
@@ -98,16 +96,14 @@ export const readEncryptedRef = async ({
 
 export const writeEncryptedRef = async ({
   fs,
-  getKeys,
+  keys,
   gitdir,
   objectId,
   ref,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'getKeys'> & {
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir' | 'keys'> & {
   ref: string;
   objectId: string;
 }) => {
-  const keys = await getKeys();
-
   const contents = decodeUTF8(objectId);
 
   const [filename, encryptedContents] = await encryptFile({

@@ -1,16 +1,16 @@
 import { getEncryptedRefPairs } from '../refs';
-import { GitBaseParamsWithGetKeys } from '../types';
+import { GitBaseParamsWithKeys } from '../types';
 
 export const getEncryptedRefObjectId = async (
-  params: GitBaseParamsWithGetKeys & {
+  params: GitBaseParamsWithKeys & {
     /**
      * The ref to fetch from the encrypted refs store.
      */
     ref: string;
   }
 ) => {
-  const { fs, gitdir, getKeys, ref } = params;
-  const refsPairs = await getEncryptedRefPairs({ fs, gitdir, getKeys });
+  const { fs, gitdir, keys, ref } = params;
+  const refsPairs = await getEncryptedRefPairs({ fs, gitdir, keys });
   const refPair = refsPairs.find(pair => {
     return pair[0] === ref;
   });

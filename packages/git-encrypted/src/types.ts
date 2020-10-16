@@ -52,12 +52,12 @@ export type GitBaseParams = GitBaseHttpParams & GitBaseOfflineParams;
 
 export type GetKeys = () => Promise<KEYS>;
 
-export type GitBaseParamsWithGetKeys = GitBaseParams & {
+export type GitBaseParamsWithKeys = GitBaseParams & {
   /**
    * An async helper to return the keys. An example is exported which fetches
    * the keys from disk.
    */
-  getKeys: GetKeys;
+  keys: KEYS;
 };
 
 export type GitApi = {
@@ -66,7 +66,7 @@ export type GitApi = {
   push: EncryptedPushPull;
 };
 
-export type GitBaseParamsEncrypted = GitBaseParamsWithGetKeys & {
+export type GitBaseParamsEncrypted = GitBaseParamsWithKeys & {
   gitApi: GitApi;
 };
 

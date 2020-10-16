@@ -5,7 +5,7 @@ import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
 export const encryptedFetch = async (
   params: GitBaseParamsEncrypted & RemoteUrl
 ) => {
-  const { remoteUrl, getKeys, fs } = params;
+  const { remoteUrl, keys, fs } = params;
   const { gitdir, gitApi, ...base } = params;
 
   const encryptedDir = getEncryptedDir({ gitdir });
@@ -19,8 +19,6 @@ export const encryptedFetch = async (
     encryptedRemoteUrl,
     // encryptedRemoteBranch: branch,
   });
-
-  const keys = await getKeys();
 
   // Decrypt objects and load them into the source repo
   // TODO Decide how to decrypt objects

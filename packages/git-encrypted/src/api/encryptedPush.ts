@@ -25,7 +25,7 @@ export const encryptedPush = async (
       refs: PushRef[];
     }
 ) => {
-  const { gitdir, getKeys } = params;
+  const { gitdir, keys } = params;
   const { gitApi, remoteUrl, refs, ...gitBaseParams } = params;
   const encryptedDir = getEncryptedDir({ gitdir });
   const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
@@ -143,8 +143,6 @@ export const encryptedPush = async (
     await writeRefsAndCommitAndPush();
     return results;
   }
-
-  const keys = await getKeys();
 
   await Bluebird.each(objectIdsToCopyToEncrypted, async objectId => {
     await copySourceObjectToEncryptedRepo({ ...gitBaseParams, keys, objectId });
