@@ -6,6 +6,66 @@ encrypted git remote strategy called `git-remote-encrypted`.
 **WARNING**: This is very early stage code. It contains bugs, the encryption
 \*setup is weak, do not use it for anything which requires high security.
 
+## Usage
+
+To experiment with this code, hopefully the following will get you up and
+running, and if not, PRs / issues welcome.
+
+- clone this repo
+- install dependencies with `yarn`
+- `yarn workspaces run build` to build all the code
+- Now you need to link `packages/git-remote-encrypted/dist/cli/index.js` into
+  your path, and it needs to be called `git-remote-encrypted`.
+  - If you have a `~/bin` folder in your path you can do this  
+    `ln -s packages/git-remote-encrypted/dist/cli/index.js ~/bin/git-remote-encrypted`
+  - Otherwise, substitute `~/bin` for another directory alread in your PATH
+
+To push to a new repository
+
+- Create a new empty repository on your favourite host (GitHub is fine)
+- Create a local repo
+  - `mkdir testing-encrypted-git`
+  - `cd testing-encrypted-git`
+  - `git init .`
+  - `git remote add enc encrypted::git@github.com:user/repo.git`
+    - Or swap this for your any other git url prefixed with `encrypted::`
+  - Add some files, commit
+    - `echo testing > testing && git add testing && git commit -m 'it works!!'`
+- Push as normal
+  - `git push -u enc master`
+- Now check the repo on GitHub
+  - Behold encrypted content
+
+NOTE: Your encryption keys have been saved in plain text inside `.git` at:
+`testing-encrypted-git/.git/encrypted-keys/keys.json`
+
+To clone from an existing repository
+
+- Follow the steps above to have a remote which is already encrypted
+- Create a local repo
+  - `mkdir testing-decrypted-git`
+  - `cd testing-decrypted-git`
+  - `git init .`
+  - `git remote add enc encrypted::git@github.com:user/repo.git`
+    - Or swap this for your any other git url prefixed with `encrypted::`
+
+* Restore your keys
+  - `mkdir .git/encrypted-keys`
+  - Copy the JSON into `.git/encrypted-keys/keys.json`
+
+- Pull as normal
+  - `git pull enc master`
+  - `git branch -u enc/master`
+- Behold decrypted content
+
+NOTE: Your remote backup is useless without the keys. You are reponsible for
+saving them somewhere.
+
+NOTE: This software is extremely experimental, do not rely on it for anything
+important.
+
+Now try `git push` and `git pull` in both directories. Check the view on GitHub.
+
 ## Architecture
 
 Inspired by [git-remote-gcrypt]() git-remote-encrypted builds a second,
