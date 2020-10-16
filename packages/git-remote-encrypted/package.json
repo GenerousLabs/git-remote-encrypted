@@ -30,6 +30,14 @@
   },
   "name": "git-remote-encrypted",
   "author": "Generous Labs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GenerousLabs/git-remote-encrypted.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GenerousLabs/git-remote-encrypted/issues"
+  },
+  "homepage": "https://github.com/GenerousLabs/git-remote-encrypted#readme",
   "devDependencies": {
     "@types/debug": "^4.1.5",
     "@vercel/ncc": "^0.24.1",
