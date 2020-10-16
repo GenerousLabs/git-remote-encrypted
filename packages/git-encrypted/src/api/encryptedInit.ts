@@ -39,8 +39,8 @@ const ensureDirectoriesExist = async ({
 export const encryptedInit = async (
   params: Omit<GitBaseParamsEncrypted, 'keys'> & EncryptedRemoteParams
 ) => {
-  const { fs, gitdir } = params;
-  const { gitApi, ...base } = params;
+  const { fs } = params;
+  const { gitApi, gitdir, ...base } = params;
 
   log('Invoked #rv3T39', JSON.stringify({ gitdir }));
 
@@ -66,6 +66,11 @@ export const encryptedInit = async (
   if (await doesDirectoryExist({ fs, path: encryptedGitDir })) {
     log('Repo was already initialised #Aq1RnX');
     await ensureDirectoriesExist({ fs, gitdir });
+
+    // We always try to pull from `encryptedRemote` into `encrypted` on init so
+    // as to be sure that our `list` command returns the latest refs available.
+    await gitApi.pull({ ...base, encryptedDir });
+
     return;
   }
 
