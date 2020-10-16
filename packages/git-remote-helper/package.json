@@ -27,7 +27,15 @@
     "trailingComma": "es5"
   },
   "name": "git-remote-helper",
-  "author": "Callum Macdonald",
+  "author": "Generous Labs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GenerousLabs/git-remote-encrypted.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GenerousLabs/git-remote-encrypted/issues"
+  },
+  "homepage": "https://github.com/GenerousLabs/git-remote-encrypted/tree/master/packages/git-remote-helper#readme",
   "module": "dist/git-remote-helper.esm.js",
   "size-limit": [
     {

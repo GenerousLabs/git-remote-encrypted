@@ -33,6 +33,14 @@
   },
   "name": "git-encrypted",
   "author": "Callum Macdonald",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GenerousLabs/git-remote-encrypted.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GenerousLabs/git-remote-encrypted/issues"
+  },
+  "homepage": "https://github.com/GenerousLabs/git-remote-encrypted/tree/master/packages/git-encrypted#readme",
   "module": "dist/git-encrypted.esm.js",
   "size-limit": [
     {

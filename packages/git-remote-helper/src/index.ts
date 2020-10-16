@@ -94,7 +94,6 @@ type ApiBase = {
   init?: (params: ApiBaseParams) => Promise<void>;
   list: (
     params: ApiBaseParams & {
-      refs: string[];
       forPush: boolean;
     }
   ) => Promise<string>;
@@ -289,7 +288,7 @@ const GitRemoteHelper = async ({
       } else if (command.command === GitCommands.list) {
         const { forPush } = command;
         try {
-          return api.list({ refs: [], gitdir, remoteName, remoteUrl, forPush });
+          return api.list({ gitdir, remoteName, remoteUrl, forPush });
         } catch (error) {
           console.error('api.list threw #93ROre');
           // console.error(error);

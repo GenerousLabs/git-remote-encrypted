@@ -48,8 +48,8 @@ GitRemoteHelper({
         encryptedRemoteUrl: remoteUrl,
       });
     },
-    list: async ({ gitdir, forPush, refs }) => {
-      logList('Got list command #VJhzH4', gitdir, forPush, refs);
+    list: async ({ gitdir, forPush }) => {
+      logList('Got list command #VJhzH4', JSON.stringify({ gitdir, forPush }));
 
       const keys = await getKeysFromDisk({ fs, gitdir });
 
@@ -83,7 +83,10 @@ GitRemoteHelper({
       return '\n';
     },
     handlePush: async ({ refs, gitdir, remoteUrl }) => {
-      logPush('handlePush() invoked #Fl6g38');
+      logPush(
+        'handlePush() invoked #Fl6g38',
+        JSON.stringify({ refs, gitdir, remoteUrl })
+      );
 
       const keys = await getKeysFromDisk({ fs, gitdir });
 
