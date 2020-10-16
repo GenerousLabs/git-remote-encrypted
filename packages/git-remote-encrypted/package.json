@@ -19,7 +19,7 @@
     "build:ncc": "ncc build -e debug -e tslib src/index.ts -o cli/",
     "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepublish": "yarn run lint && yarn run test && yarn run build"
+    "prepare": "yarn run lint && yarn run test && yarn run build"
   },
   "peerDependencies": {},
   "prettier": {
