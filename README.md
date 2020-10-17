@@ -1,6 +1,6 @@
 # git-remote-encrypted
 
-This is a mono repo containing several packages which together create an
+This is a monorepo containing several packages which together create an
 encrypted git remote strategy called `git-remote-encrypted`.
 
 **WARNING**: This is very early stage code. It contains bugs, the encryption
