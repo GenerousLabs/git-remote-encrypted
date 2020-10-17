@@ -4,7 +4,7 @@ This is a monorepo containing several packages which together create an
 encrypted git remote strategy called `git-remote-encrypted`.
 
 **WARNING**: This is very early stage code. It contains bugs, the encryption
-\*setup is weak, do not use it for anything which requires high security.
+setup is weak, do not use it for anything which requires high security.
 
 ## Architecture
 
