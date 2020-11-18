@@ -1,0 +1,38 @@
+{
+  "folders": [
+	{
+		"path": "."
+	},
+	{
+		"path": "packages/git-encrypted"
+	},
+	{
+		"path": "packages/git-remote-encrypted"
+	},
+	{
+		"path": "packages/git-remote-helper"
+	},
+	{
+		"path": "packages/isomorphic-git-remote-encrypted"
+	}
+],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.activeBackground": "#85cddd",
+			"activityBar.activeBorder": "#ce51b7",
+			"activityBar.background": "#85cddd",
+			"activityBar.foreground": "#15202b",
+			"activityBar.inactiveForeground": "#15202b99",
+			"activityBarBadge.background": "#ce51b7",
+			"activityBarBadge.foreground": "#15202b",
+			"statusBar.background": "#5dbcd2",
+			"statusBar.foreground": "#15202b",
+			"statusBarItem.hoverBackground": "#37aac5",
+			"titleBar.activeBackground": "#5dbcd2",
+			"titleBar.activeForeground": "#15202b",
+			"titleBar.inactiveBackground": "#5dbcd299",
+			"titleBar.inactiveForeground": "#15202b99"
+		},
+		"peacock.color": "#5dbcd2"
+	}
+}
