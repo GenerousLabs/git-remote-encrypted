@@ -26,6 +26,7 @@ To **push** to a new repository:
   - `git init .`
   - `git remote add enc encrypted::git@github.com:user/repo.git`
     - Or swap this for your any other git url prefixed with `encrypted::`
+    - **NOTE:** Relative paths are not currently supported. See [#3](https://github.com/GenerousLabs/git-remote-encrypted/issues/3)
   - Add some files, commit
     - `echo testing > testing && git add testing && git commit -m 'it works!!'`
 - Push as normal
