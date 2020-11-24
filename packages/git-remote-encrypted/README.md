@@ -56,7 +56,7 @@ Then to **pull** from your encrypted repository:
   - `git branch -u enc/master`
 - Behold decrypted content
 
-## Ntes
+## Notes
 
 - Your remote backup is useless without the keys. You are reponsible for
   saving them somewhere.
