@@ -63,3 +63,16 @@ Then to **pull** from your encrypted repository:
 - This software is extremely experimental, do not rely on it for anything
   important. There are probably gaping holes in the crypto. Issues or PRs
   welcome.
+
+## Development
+
+To develop this locally, you can do the following:
+
+- `yarn workspaces run build`
+- `ln -s ~/bin/git-remote-encrypted $(pwd)/cli/index.js`
+  - Or equivalent. Essentially you need a symlink in your PATH that is called
+    `git-remote-encrypted` and that targets the `cli/index.js` file in this
+    folder.
+- You need to rerun the build command after each change, or run the
+  appropriate watch command for both this package and the dependent
+  `git-remote-helper` and `git-encrypted` packages.
