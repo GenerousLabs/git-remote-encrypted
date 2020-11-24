@@ -15,10 +15,9 @@ export const clone: EncryptedPushPull = async ({
   logClone('Running node gitApi.clone() #50DK7v');
   const result = await execa(
     'git',
-    ['clone', '--single-branch', '--no-tags', url, '.'],
+    ['clone', '--single-branch', '--no-tags', url, encryptedDir],
     {
       reject: false,
-      cwd: encryptedDir,
     }
   );
 
