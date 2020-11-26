@@ -41,6 +41,14 @@ This repo contains several packages:
 - `git-remote-helper` - A generic helper to simplify creating git remote
   helpers
 
+## Development
+
+To run this code locally, you need to build the `git-remote-helper` package first. It seems like with yarn v1 there is no way to specify the build order. Bottom line, this should get you running:
+
+- `yarn` - Install the dependencies for all packages
+- `yarn workspace git-remote-helper build` - Build the git-remote-helper package
+- `yarn workspaces run build` - Build all packages
+
 ## Terminology
 
 - `source` - The cleartext repository
