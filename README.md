@@ -54,8 +54,12 @@ This repo contains several packages:
 - Symmetric encryption
 - One key to encrypt objects
 - One key to encrypt filenames
-- The object ID is combined with a salt and hashed to produce an encryption nonce
-  - Unclear if this is safe or not. Perhaps a more elaborate password derivation scheme is required.
+- The object ID is combined with a salt and hashed to produce an encryption
+  nonce
+  - Unclear if this is safe or not. Perhaps a more elaborate password
+    derivation scheme is required.
+  - UPDATE: It [seems](https://github.com/dchest/tweetnacl-js/issues/207)
+    that this approach is secure.
 - The nonce and object key is used to encrypt the object body
 - The same nonce is used to encrypt the filename
 - The nonce and encrypted body are combined
