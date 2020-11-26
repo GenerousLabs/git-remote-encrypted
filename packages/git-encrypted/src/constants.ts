@@ -1,5 +1,8 @@
 import { secretbox } from 'tweetnacl';
 
+// This is copied from `require('tweetnacl-js').secretbox.keyLength`
+export const KEY_LENGTH_BYTES = 32 as const;
+
 export const ENCRYPTED_DIR = 'encrypted' as const;
 export const OBJECTS_DIR = 'objects';
 export const REFS_DIR = 'refs';
