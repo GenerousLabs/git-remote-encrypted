@@ -8,8 +8,9 @@ import {
   EncryptedPushResult,
   getKeysFromDisk,
   getRefsGitString,
-  nodeGitApi as gitApi,
 } from 'git-encrypted';
+import { gitApi } from 'git-encrypted-host-git-api';
+
 import GitRemoteHelper from 'git-remote-helper';
 import http from 'isomorphic-git/http/node';
 import { packageLog } from './log';

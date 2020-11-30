@@ -1,11 +1,10 @@
 import execa from 'execa';
-import { packageLog } from '../log';
-import { EncryptedPushPull } from '../types';
+import { EncryptedPushPull } from 'git-encrypted';
+import { packageLog } from './log';
 
-const log = packageLog.extend('node');
-const logClone = log.extend('clone');
-const logPush = log.extend('push');
-const logPull = log.extend('pull');
+const logClone = packageLog.extend('clone');
+const logPush = packageLog.extend('push');
+const logPull = packageLog.extend('pull');
 
 export const clone: EncryptedPushPull = async ({
   encryptedDir,
