@@ -61,14 +61,14 @@
     "size-limit": "^4.6.0",
     "tsdx": "^0.14.1",
     "tslib": "^2.0.3",
-    "typescript": "^4.0.3"
+    "typescript": "^4.1.2"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
     "debug": "^4.2.0",
     "enc-utils": "^2.2.2",
     "git-encrypted-host-git-api": "0.1.0",
-    "isomorphic-git": "^1.7.8",
+    "isomorphic-git": "^1.8.0",
     "pako": "^1.0.11",
     "remeda": "^0.0.23",
     "tweetnacl": "^1.0.3",
