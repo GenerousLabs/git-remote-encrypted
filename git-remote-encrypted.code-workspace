@@ -15,6 +15,10 @@
 		{
 			"name": "📦 git-remote-helper",
 			"path": "packages/git-remote-helper"
+		},
+		{
+			"name": "📦 isomorphic-git-remote-encrypted",
+			"path": "packages/isomorphic-git-remote-encrypted"
 		}
 	],
 	"settings": {
