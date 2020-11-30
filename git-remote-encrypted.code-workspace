@@ -1,21 +1,22 @@
 {
   "folders": [
-	{
-		"path": "."
-	},
-	{
-		"path": "packages/git-encrypted"
-	},
-	{
-		"path": "packages/git-remote-encrypted"
-	},
-	{
-		"path": "packages/git-remote-helper"
-	},
-	{
-		"path": "packages/isomorphic-git-remote-encrypted"
-	}
-],
+		{
+			"name": "📦 git-encrypted",
+			"path": "packages/git-encrypted"
+		},
+		{
+			"name": "🚀 git-encrypted-host-git-api",
+			"path": "packages/git-encrypted-host-git-api"
+		},
+		{
+			"name": "📦 git-remote-encrypted",
+			"path": "packages/git-remote-encrypted"
+		},
+		{
+			"name": "📦 git-remote-helper",
+			"path": "packages/git-remote-helper"
+		}
+	],
 	"settings": {
 		"workbench.colorCustomizations": {
 			"activityBar.activeBackground": "#85cddd",
