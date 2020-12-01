@@ -8,14 +8,16 @@ setup is weak, do not use it for anything which requires high security.
 
 ## Architecture
 
-Inspired by [git-remote-gcrypt]() git-remote-encrypted builds a second,
-encrypted, repository from the first, plain text, repository. We'll call
-these two repositories `source` and `encrypted`. On `git push`, every [git
-object](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects) is
-encrypted and then added to the `encrypted` repo. After all the objects have
-been added, the `encrypted` repo is then pushed to the designated remote. On
-`git pull` or `git fetch`, the `encrypted` repo is pulled, and then any new
-objects are decrypted and copied into `source`.
+Inspired by
+[git-remote-gcrypt](https://spwhitton.name/tech/code/git-remote-gcrypt/)
+git-remote-encrypted builds a second, encrypted, repository from the first,
+plain text, repository. We'll call these two repositories `source` and
+`encrypted`. On `git push`, every [git
+object](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects) is encrypted
+and then added to the `encrypted` repo. After all the objects have been added,
+the `encrypted` repo is then pushed to the designated remote. On `git pull` or
+`git fetch`, the `encrypted` repo is pulled, and then any new objects are
+decrypted and copied into `source`.
 
 The encryption is deterministic, so if the same git object is encrypted on
 two machines, with the same encryption keys, it will produce the same
