@@ -1,6 +1,10 @@
 import fs from 'fs';
 import { HttpClient } from 'isomorphic-git';
 
+export type Headers = {
+  [name: string]: string;
+};
+
 // NOTE: These types are the same as in the `git-remote-helper` package, but not
 // imported from there because we don't want to depend on the remote helper in
 // the browser. Also, we don't strictly speaking need to keep the same API. The
@@ -93,6 +97,7 @@ export type EncryptedRemoteParams = {
    */
   // Disable the remote branch for now, it's complicated
   // encryptedRemoteBranch: string;
+  encryptedRemoteHeaders?: Headers;
 };
 
 export type EncryptedPushPull = (
