@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "debug": "^4.2.0",
-    "git-encrypted": "0.1.1",
+    "git-encrypted": "0.1.2",
     "git-encrypted-host-git-api": "0.1.0",
     "git-remote-helper": "0.1.0",
     "isomorphic-git": "^1.8.0"
