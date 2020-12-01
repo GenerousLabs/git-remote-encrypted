@@ -2,6 +2,9 @@ import { copyAllEncryptedObjectsToSourceRepo } from '../objects';
 import { GitBaseParamsEncrypted, RemoteUrl } from '../types';
 import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
 
+/**
+ * Update the encrypted repo and then copy all its objects into the source repo.
+ */
 export const encryptedFetch = async (
   params: GitBaseParamsEncrypted & RemoteUrl
 ) => {

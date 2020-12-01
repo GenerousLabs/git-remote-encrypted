@@ -19,6 +19,10 @@ export enum EncryptedPushResult {
   error = 'error',
 }
 
+/**
+ * Given a source repo, update the encrypted repo, then copy any missing
+ * objects from source into encrypted, and push encrypted to its remote.
+ */
 export const encryptedPush = async (
   params: GitBaseParamsEncrypted &
     RemoteUrl & {
