@@ -136,6 +136,13 @@ export const encryptedPush = async (
     });
   };
 
+  const errors = await Bluebird.filter(results, result => {
+    return result.result === EncryptedPushResult.error;
+  });
+  if (errors.length > 0) {
+    throw new Error('Error during encryptedPush() #jpFpwy');
+  }
+
   // After checking all the requested push refs, copy any new objects
   if (objectIdsToCopyToEncrypted.size === 0) {
     // It's unlikely that we'll have found zero objects, if so, something
