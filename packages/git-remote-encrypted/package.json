@@ -47,7 +47,7 @@
     "typescript": "^4.1.2"
   },
   "dependencies": {
-    "debug": "^4.2.0",
+    "debug": "^4.3.1",
     "git-encrypted": "0.1.2",
     "git-encrypted-host-git-api": "0.1.0",
     "git-remote-helper": "0.1.0",
