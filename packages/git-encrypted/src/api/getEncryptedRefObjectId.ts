@@ -1,5 +1,8 @@
+import { packageLog } from '../log';
 import { getEncryptedRefPairs } from '../refs';
 import { GitBaseParamsWithKeys } from '../types';
+
+const log = packageLog.extend('getEncryptedRefObjectId');
 
 export const getEncryptedRefObjectId = async (
   params: GitBaseParamsWithKeys & {
@@ -10,7 +13,11 @@ export const getEncryptedRefObjectId = async (
   }
 ) => {
   const { fs, gitdir, keys, ref } = params;
+
+  log('Invoked #yxfFHO', JSON.stringify({ params }));
+
   const refsPairs = await getEncryptedRefPairs({ fs, gitdir, keys });
+
   const refPair = refsPairs.find(pair => {
     return pair[0] === ref;
   });
