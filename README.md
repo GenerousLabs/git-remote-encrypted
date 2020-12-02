@@ -52,6 +52,12 @@ To run this code locally, you need to build the `git-remote-helper` and `git-enc
 - `yarn workspace git-encrypted build` - Build the git-encrypted package
 - `yarn workspaces run build` - Build all packages
 
+NOTE: Linting is currently broken in the `git-encrypted` package. It seems to
+be related to [this issue](https://github.com/formium/tsdx/issues/926) with
+tsdx. Unfortunately, for the time being, that means you can only commit to
+the project by adding the `--no-verify` option to `git commit`. Hopefully
+there's a fix available for TypeScript 4 and tsdx soon.
+
 ## Terminology
 
 - `source` - The cleartext repository
