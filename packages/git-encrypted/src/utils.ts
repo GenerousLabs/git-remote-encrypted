@@ -1,10 +1,10 @@
 import { join } from 'path';
 import {
-  REFS_DIR,
   ENCRYPTED_DIR,
   ENCRYPTED_KEYS_DIR,
   KEYS_FILENAME,
   OBJECTS_DIR,
+  REFS_DIR,
 } from './constants';
 import { FS, GitBaseParams, RemoteUrl } from './types';
 
