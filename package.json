@@ -16,6 +16,8 @@
     }
   },
   "devDependencies": {
-    "husky": "^4.3.0"
-  }
+    "husky": "^4.3.0",
+    "lerna": "^3.22.1"
+  },
+  "dependencies": {}
 }
