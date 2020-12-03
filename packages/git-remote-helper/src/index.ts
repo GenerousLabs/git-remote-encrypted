@@ -2,7 +2,7 @@ import debug from 'debug';
 import { asyncMap } from 'rxjs-async-map';
 import { rxToStream, streamToStringRx } from 'rxjs-stream';
 import { filter, map, mergeMap, scan, tap } from 'rxjs/operators';
-import { superpathjoin } from 'superpathjoin';
+import { superpathjoin as join } from 'superpathjoin';
 
 // TODO Add tests
 
@@ -133,7 +133,7 @@ const GitRemoteHelper = async ({
     }
     return env['GIT_DIR'];
   };
-  const gitdir = superpathjoin(process.cwd(), getDir());
+  const gitdir = join(process.cwd(), getDir());
 
   const [, , remoteName, remoteUrl] = process.argv;
 
