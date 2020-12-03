@@ -55,6 +55,7 @@
   "dependencies": {
     "debug": "^4.3.1",
     "git-encrypted": "^0.2.0",
-    "isomorphic-git": "^1.8.0"
+    "isomorphic-git": "^1.8.0",
+    "superpathjoin": "^2.0.1"
   }
 }
