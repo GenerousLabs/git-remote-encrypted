@@ -71,6 +71,7 @@
     "remeda": "^0.0.23",
     "superpathjoin": "^2.0.1",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1"
+    "tweetnacl-util": "^0.15.1",
+    "zod": "^1.11.11"
   }
 }
