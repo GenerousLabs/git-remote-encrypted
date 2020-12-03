@@ -1,8 +1,8 @@
-import git from 'isomorphic-git';
 import { GitApi } from 'git-encrypted';
-import debug from 'debug';
+import git from 'isomorphic-git';
+import { packageLog } from './packageLog';
 
-const log = debug('isomorphic-git-remote-encrypted');
+const log = packageLog.extend('gitApi');
 const logClone = log.extend('clone');
 const logPull = log.extend('pull');
 const logPush = log.extend('push');
@@ -19,7 +19,15 @@ export const gitApi: GitApi = {
       throwOnError = true,
     } = params;
     try {
-      logClone('Invoked #v3RyxZ', JSON.stringify({ params }));
+      logClone(
+        'Invoked #v3RyxZ',
+        JSON.stringify({
+          corsProxy,
+          encryptedDir,
+          encryptedRemoteUrl,
+          throwOnError,
+        })
+      );
       await git.clone({
         fs,
         http,
@@ -44,13 +52,19 @@ export const gitApi: GitApi = {
       throwOnError = true,
     } = params;
     try {
-      logPull('Invoked #ttv76Y', JSON.stringify({ params }));
+      logPull(
+        'Invoked #ttv76Y',
+        JSON.stringify({ corsProxy, encryptedDir, throwOnError })
+      );
       await git.pull({
         fs,
         http,
         headers: encryptedRemoteHeaders,
         corsProxy,
         dir: encryptedDir,
+        author: {
+          name: 'isomorphic-git-remote-encrypted',
+        },
       });
     } catch (error) {
       if (throwOnError) {
@@ -68,7 +82,10 @@ export const gitApi: GitApi = {
       throwOnError = true,
     } = params;
     try {
-      logPush('Invoked #JCwPKA', JSON.stringify({ params }));
+      logPush(
+        'Invoked #JCwPKA',
+        JSON.stringify({ corsProxy, encryptedDir, throwOnError })
+      );
       await git.push({
         fs,
         http,
