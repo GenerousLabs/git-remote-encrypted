@@ -56,6 +56,7 @@
   "dependencies": {
     "rxjs": "^6.6.3",
     "rxjs-async-map": "^0.2.0",
-    "rxjs-stream": "^3.2.1"
+    "rxjs-stream": "^3.2.1",
+    "superpathjoin": "^2.0.1"
   }
 }
