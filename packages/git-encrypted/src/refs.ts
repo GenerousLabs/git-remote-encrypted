@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import { join } from 'path';
+import { superpathjoin as join } from 'superpathjoin';
 import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util';
 import {
   createNonce,

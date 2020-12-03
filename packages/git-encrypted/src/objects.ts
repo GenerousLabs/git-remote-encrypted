@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird';
 import git from 'isomorphic-git';
 import { deflate, inflate } from 'pako';
-import { join } from 'path';
+import { superpathjoin as join } from 'superpathjoin';
 import { decodeUTF8 } from 'tweetnacl-util';
 import {
   createNonce,

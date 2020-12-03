@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { superpathjoin as join } from 'superpathjoin';
 import {
   ENCRYPTED_DIR,
   ENCRYPTED_KEYS_DIR,
