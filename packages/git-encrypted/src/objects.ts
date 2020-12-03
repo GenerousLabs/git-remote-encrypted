@@ -9,7 +9,7 @@ import {
   encryptFile,
   encryptFilename,
 } from './crypto';
-import { GitBaseOfflineParams, GitBaseParams, KEYS } from './types';
+import { GitBaseOfflineParams, GitBaseParams, Keys } from './types';
 import { getEncryptedObjectsDir, getEncryptedRefsDir, wrap } from './utils';
 
 // This is unnecessarily async because the isomorphic-git inflate / deflate code
@@ -79,7 +79,7 @@ export const encryptAndWriteObject = async ({
   objectId,
   keys,
 }: Pick<GitBaseParams, 'fs' | 'gitdir'> & {
-  keys: KEYS;
+  keys: Keys;
   objectId: string;
   deflatedWrappedContent: Uint8Array;
 }) => {
@@ -98,7 +98,7 @@ export const encryptAndWriteObject = async ({
 };
 
 export const copySourceObjectToEncryptedRepo = async (
-  params: GitBaseParams & { keys: KEYS; objectId: string }
+  params: GitBaseParams & { keys: Keys; objectId: string }
 ) => {
   const { objectId, ...base } = params;
 
@@ -133,7 +133,7 @@ export const copySourceObjectToEncryptedRepo = async (
 };
 
 export const readEnryptedObject = async (
-  params: GitBaseOfflineParams & { keys: KEYS; objectId: string }
+  params: GitBaseOfflineParams & { keys: Keys; objectId: string }
 ) => {
   const { fs, gitdir, objectId, keys } = params;
   const dir = getEncryptedFileDir({ gitdir, fileType: FileType.object });
@@ -176,7 +176,7 @@ export const writeDeflatedWrappdObjectToSourceRepo = async ({
 };
 
 export const copyEncryptedObjectToSourceRepo = async (
-  params: GitBaseOfflineParams & { keys: KEYS; objectId: string }
+  params: GitBaseOfflineParams & { keys: Keys; objectId: string }
 ) => {
   const { fs, gitdir } = params;
   const deflatedWrappedObject = await readEnryptedObject(params);
@@ -192,7 +192,7 @@ export const copyAllEncryptedObjectsToSourceRepo = async ({
   fs,
   gitdir,
   keys,
-}: GitBaseOfflineParams & { keys: KEYS }) => {
+}: GitBaseOfflineParams & { keys: Keys }) => {
   const encryptedObjectsDir = getEncryptedObjectsDir({ gitdir });
 
   const encryptedObjectFilenames = await fs.promises.readdir(

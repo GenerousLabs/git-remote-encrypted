@@ -8,7 +8,7 @@ import {
   encryptFile,
   encryptFilename,
 } from './crypto';
-import { GitBaseParamsEncrypted, KEYS, RefPair } from './types';
+import { GitBaseParamsEncrypted, Keys, RefPair } from './types';
 import { doesFileExist, getEncryptedRefsDir } from './utils';
 
 export const refPairsToGitString = ({ refPairs }: { refPairs: RefPair[] }) => {
@@ -53,7 +53,7 @@ export const getEncryptedRefFilename = async ({
   ref,
 }: {
   ref: string;
-  keys: KEYS;
+  keys: Keys;
 }) => {
   const refArray = decodeUTF8(ref);
   const nonce = await createNonce({ salt: keys.salt, input: refArray });

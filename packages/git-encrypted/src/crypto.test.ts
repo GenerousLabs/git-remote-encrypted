@@ -8,9 +8,9 @@ import {
   split,
   decryptFileContentsOnly,
 } from './crypto';
-import { KEYS } from './types';
+import { Keys } from './types';
 
-const keys: KEYS = {
+const keys: Keys = {
   content: decodeBase64('OTdY2G5jOtUb4NkTIrcMic5Om2FSGVNr+mOV21bMfkY='),
   filename: decodeBase64('aeFYzTwOrPbAPu7Lyw1QZ34JglphbLTgAAHtjr2Zcps='),
   salt: decodeBase64('wIfKspQFPMhcpxWSNO/d/aA50ErheC6t'),

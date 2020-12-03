@@ -1,3 +1,4 @@
+import zod from 'zod';
 import fs from 'fs';
 import { HttpClient } from 'isomorphic-git';
 
@@ -54,14 +55,14 @@ export type GitBaseOfflineParams = {
 
 export type GitBaseParams = GitBaseHttpParams & GitBaseOfflineParams;
 
-export type GetKeys = () => Promise<KEYS>;
+export type GetKeys = () => Promise<Keys>;
 
 export type GitBaseParamsWithKeys = GitBaseParams & {
   /**
    * An async helper to return the keys. An example is exported which fetches
    * the keys from disk.
    */
-  keys: KEYS;
+  keys: Keys;
 };
 
 export type GitApi = {
@@ -116,13 +117,19 @@ export type EncryptedPushPull = (
     }
 ) => Promise<void>;
 
-export type KEYS = {
-  content: Uint8Array;
-  filename: Uint8Array;
-  salt: Uint8Array;
-};
+export const KeysSchema = zod.object({
+  content: zod.instanceof(Uint8Array),
+  filename: zod.instanceof(Uint8Array),
+  salt: zod.instanceof(Uint8Array),
+});
+export type Keys = zod.infer<typeof KeysSchema>;
 
-export type KEYS_STRINGS = Record<keyof KEYS, string>;
+export const KeysBase64Schema = zod.object({
+  content: zod.string().nonempty(),
+  filename: zod.string().nonempty(),
+  salt: zod.string().nonempty(),
+});
+export type KeysBase64 = zod.infer<typeof KeysBase64Schema>;
 
 type Ref = string;
 type ObjectId = string;

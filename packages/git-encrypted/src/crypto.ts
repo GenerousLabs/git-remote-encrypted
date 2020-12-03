@@ -2,7 +2,7 @@ import { arrayToHex, hexToArray } from 'enc-utils';
 import { hash, randomBytes, secretbox } from 'tweetnacl';
 import { decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
 import { NONCE_LENGTH } from './constants';
-import { KEYS } from './types';
+import { Keys } from './types';
 
 export const concat = (a: Uint8Array, b: Uint8Array) => {
   const length = a.length + b.length;
@@ -77,7 +77,7 @@ export const encryptFilename = async ({
 }: {
   filenameArray: Uint8Array;
   nonce: Uint8Array;
-  keys: KEYS;
+  keys: Keys;
 }) => {
   const encryptedFilenameArray = await encrypt(
     filenameArray,
@@ -101,7 +101,7 @@ export const encryptFile = async ({
 }: {
   filename: string;
   contents: Uint8Array;
-  keys: KEYS;
+  keys: Keys;
 }): Promise<[string, Uint8Array]> => {
   const filenameArray = decodeUTF8(filename);
   const nonce = await createNonce({ salt: keys.salt, input: filenameArray });
@@ -125,7 +125,7 @@ export const decryptFile = async ({
 }: {
   encryptedFilenameHex: string;
   fileContents: Uint8Array;
-  keys: KEYS;
+  keys: Keys;
 }): Promise<[string, Uint8Array]> => {
   const [nonce, encryptedContents] = split(fileContents, NONCE_LENGTH);
 
@@ -151,7 +151,7 @@ export const decryptFileContentsOnly = async ({
   keys,
 }: {
   fileContents: Uint8Array;
-  keys: KEYS;
+  keys: Keys;
 }) => {
   const [nonce, encryptedContents] = split(fileContents, NONCE_LENGTH);
 
