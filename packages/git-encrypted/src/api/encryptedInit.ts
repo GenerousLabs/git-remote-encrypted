@@ -34,7 +34,11 @@ const ensureDirectoriesExist = async ({
 };
 
 /**
- * Create a new encrypted remote.
+ * Initialise an encrypted remote.
+ *
+ * Ensures the `.git/encrypted` and `.git/encrypted-keys` directories exist,
+ * creates a new set of keys if required, and then clones the supplied remote
+ * into the `.git/encrypted` directory.
  */
 export const encryptedInit = async (
   params: Omit<GitBaseParamsEncrypted, 'keys'> & EncryptedRemoteParams
