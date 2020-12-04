@@ -9,4 +9,5 @@ export { getRefsGitString } from './api/getRefsGitString';
 
 export * from './utils';
 export * from './constants';
+export * from './keys';
 export * from './types';
