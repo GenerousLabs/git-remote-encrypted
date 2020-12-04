@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "AGPL-3.0-or-later",
   "typings": "dist/index.d.ts",
   "files": [
@@ -47,8 +47,8 @@
   },
   "dependencies": {
     "debug": "^4.3.1",
-    "git-encrypted": "^0.3.0",
-    "git-encrypted-host-git-api": "^0.3.0",
+    "git-encrypted": "^0.3.1",
+    "git-encrypted-host-git-api": "^0.3.1",
     "git-remote-helper": "^0.3.0",
     "isomorphic-git": "^1.8.0"
   }
