@@ -5,11 +5,12 @@ import {
   FS,
   getEncryptedRefObjectId,
   getKeysFromDisk,
+  GIT_ENCRYPTED_AUTHOR,
   Keys,
   KeysBase64,
   saveKeysToDisk,
 } from 'git-encrypted';
-import git, { Errors, HttpClient } from 'isomorphic-git';
+import git, { HttpClient } from 'isomorphic-git';
 import { superpathjoin as join } from 'superpathjoin';
 import { gitApi } from './gitApi';
 import { packageLog } from './packageLog';
@@ -211,15 +212,15 @@ export const simplePullWithOptionalEncryption = async (
     );
   }
 
-  try {
-    await git.writeRef({ fs, gitdir, ref, value: commitId });
-  } catch (error) {
-    // We can silently swallow `AlreadExistsErrors` because that means there was
-    // nothing to change.
-    if (!(error instanceof Errors.AlreadyExistsError)) {
-      throw error;
-    }
-  }
+  await git.merge({
+    fs,
+    gitdir,
+    theirs: commitId,
+    fastForwardOnly: false,
+    author: GIT_ENCRYPTED_AUTHOR,
+  });
+
+  await git.checkout({ fs, dir, ref });
 };
 
 /**
