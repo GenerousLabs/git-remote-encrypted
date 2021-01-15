@@ -1,13 +1,15 @@
-import argon2 from 'argon2';
+import { scrypt } from 'scrypt-js';
 
-// TODO: read salt from user's repository
-const SALT = Buffer.from('deadbeef');
+export const hash = async (password: string, salt: string) => {
+  const passwordBuffer = Buffer.from(password.normalize('NFKC'));
+  const saltBuffer = Buffer.from(salt.normalize('NFKC'));
 
-export const hash = async (password: string) => {
-  const hash = await argon2.hash(password, {
-    salt: SALT,
-    raw: true,
-    hashLength: 96,
-  });
+  const N = 1024;
+  const r = 8;
+  const p = 1;
+  const dkLen = 96;
+
+  const hash = await scrypt(passwordBuffer, saltBuffer, N, r, p, dkLen);
+
   return hash;
 };
