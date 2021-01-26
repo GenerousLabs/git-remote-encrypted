@@ -1,15 +1,30 @@
 import { scrypt } from 'scrypt-js';
 
-export const hash = async (password: string, salt: string) => {
+export const hash = async ({
+  password,
+  salt,
+  cpuCost,
+  blockSize,
+  parallelizationCost,
+}: {
+  password: string;
+  salt: string;
+  cpuCost: number;
+  blockSize: number;
+  parallelizationCost: number;
+}) => {
   const passwordBuffer = Buffer.from(password.normalize('NFKC'));
   const saltBuffer = Buffer.from(salt.normalize('NFKC'));
+  const keyLength = 96;
 
-  const N = 1024;
-  const r = 8;
-  const p = 1;
-  const dkLen = 96;
-
-  const hash = await scrypt(passwordBuffer, saltBuffer, N, r, p, dkLen);
+  const hash = await scrypt(
+    passwordBuffer,
+    saltBuffer,
+    cpuCost,
+    blockSize,
+    parallelizationCost,
+    keyLength
+  );
 
   return hash;
 };
