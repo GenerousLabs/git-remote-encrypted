@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`keyDerivation hash() Creates a hash from the password "foobar" 1`] = `
+exports[`keyDerivation deriveKey() Creates a hash from the password "foobar" 1`] = `
 Uint8Array [
   53,
   105,
