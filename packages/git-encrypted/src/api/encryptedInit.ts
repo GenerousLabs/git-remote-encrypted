@@ -1,7 +1,7 @@
-import { isEmptyRepo } from '../git';
 import { packageLog } from '../log';
 import {
   EncryptedRemoteParams,
+  FS,
   GitBaseParams,
   GitBaseParamsEncrypted,
 } from '../types';
@@ -14,10 +14,119 @@ import {
   getEncryptedObjectsDir,
   getEncryptedRefsDir,
 } from '../utils';
-import { createKeys } from './createKeys';
 import { saveKeysToDisk } from './saveKeysToDisk';
 
 const log = packageLog.extend('encryptedInit');
+
+// TODO1 Move this to `../meta.ts`
+const creatEncryptedMeta = async (): Promise<EncryptedMeta> => {
+  return {
+    version: 1,
+    derivationParams: {
+      // TODO1 Generate a random salt
+      salt: 'generatedrandomsalt',
+      cpuCost: 1024,
+      blockSize: 8,
+      parallelizationCost: 1,
+    },
+  };
+};
+
+// TODO1 Move this to `../meta.ts`
+const readMetaFromDisk = async ({
+  fs,
+  encryptedDir,
+}: {
+  fs: FS;
+  encryptedDir: string;
+}): Promise<EncryptedMeta> => {
+  console.log('#SbXtKQ', fs, encryptedDir);
+  // TODO1 Read from disk
+  return {
+    version: 1,
+    derivationParams: {
+      salt: 'salt',
+      cpuCost: 8,
+      blockSize: 1,
+      parallelizationCost: 1,
+    },
+  };
+};
+
+// TODO1 Move this to `../meta.ts`
+const writeMetaToEncryptedRepo = async ({
+  fs,
+  encryptedDir,
+  meta,
+}: {
+  fs: FS;
+  encryptedDir: string;
+  meta: EncryptedMeta;
+}) => {
+  console.log('#3wQJK9', fs, encryptedDir, meta);
+  // TODO1 Create file
+  // TODO1 Create commit in `.git/encrypted` repo
+};
+
+export type EncryptedMeta = {
+  version: 1;
+  derivationParams: {
+    salt: string;
+    cpuCost: number;
+    blockSize: number;
+    parallelizationCost: number;
+  };
+};
+
+// TODO1 Move this to `../meta.ts`
+const ensureMetaExists = async ({
+  fs,
+  encryptedDir,
+}: Pick<GitBaseParamsEncrypted, 'fs'> & {
+  encryptedDir: string;
+}): Promise<EncryptedMeta> => {
+  const meta = await readMetaFromDisk({ fs, encryptedDir });
+  if (typeof meta !== 'undefined') {
+    return meta;
+  }
+
+  const metaToSave = await creatEncryptedMeta();
+  await writeMetaToEncryptedRepo({ fs, encryptedDir, meta: metaToSave });
+  return metaToSave;
+};
+
+// TODO1 Move this to `../crypto.ts`
+const ensureKeysExist = async ({
+  fs,
+  gitdir,
+  encryptedDir,
+  encryptedKeysDir,
+  keyDerivatinoPassword,
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & {
+  encryptedDir: string;
+  encryptedKeysDir: string;
+  keyDerivatinoPassword?: string;
+}) => {
+  const encryptedKeysDirectoryExists = await doesDirectoryExist({
+    fs,
+    path: encryptedKeysDir,
+  });
+
+  if (encryptedKeysDirectoryExists) {
+    return;
+  }
+
+  if (typeof keyDerivatinoPassword === 'undefined') {
+    throw new Error(
+      'Cannot initialise without key derivation password #xvoEqa'
+    );
+  }
+
+  const meta = await ensureMetaExists({ fs, encryptedDir });
+
+  const keys = deriveKeys({ ...meta.derivationParams, keyDerivationPassword });
+  await saveKeysToDisk({ fs, gitdir, keys });
+};
 
 const ensureDirectoriesExist = async ({
   fs,
@@ -41,7 +150,18 @@ const ensureDirectoriesExist = async ({
  * into the `.git/encrypted` directory.
  */
 export const encryptedInit = async (
-  params: Omit<GitBaseParamsEncrypted, 'keys'> & EncryptedRemoteParams
+  params: Omit<GitBaseParamsEncrypted, 'keys'> &
+    EncryptedRemoteParams & {
+      /**
+       * A passphrase that can be used to derive the encryption keys.
+       *
+       * NOTE: This must be provided if the `.git/encrypted-keys/keys.json`
+       * file does not already contain the required keys.
+       */
+      keyDerivationPassword?: string;
+      // Would this be a better name?
+      // keyDerivationPassphrase: string;
+    }
 ) => {
   const { fs } = params;
   const { gitApi, gitdir, ...base } = params;
@@ -50,16 +170,6 @@ export const encryptedInit = async (
 
   const encryptedDir = getEncryptedDir({ gitdir });
   const encryptedKeysDir = getEncryptedKeysDir({ gitdir });
-
-  // Check if the directories exist BEFORE creating them
-  const encryptedDirectoryExists = await doesDirectoryExist({
-    fs,
-    path: encryptedDir,
-  });
-  const encryptedKeysDirectoryExists = await doesDirectoryExist({
-    fs,
-    path: encryptedKeysDir,
-  });
 
   await ensureDirectoryExists({ fs, path: encryptedDir });
 
@@ -80,18 +190,7 @@ export const encryptedInit = async (
 
   await gitApi.clone({ ...base, encryptedDir });
 
-  // If the directory did not exist, and we cloned an empty repo, then let's
-  // create and save new keys now.
-  if (!encryptedDirectoryExists && !encryptedKeysDirectoryExists) {
-    if (await isEmptyRepo({ fs, gitdir: encryptedGitDir })) {
-      const keys = await createKeys();
-      await saveKeysToDisk({ fs, gitdir, keys });
-      log('Creating a new set of keys #1QkKPD');
-      console.error(
-        'New keys created and saved to .git/encrypted-keys/keys.json. Back them up! #35GYES'
-      );
-    }
-  }
+  await ensureKeysExist({ fs, gitdir, encryptedDir, encryptedKeysDir });
 
   // NOTE: We need to run this AFTER the clone because otherwise git complains
   // of trying to clone into a not empty directory.
