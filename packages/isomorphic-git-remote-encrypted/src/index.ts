@@ -298,11 +298,6 @@ export const simpleEncryptedClone = async (
   cloneLog('getKeysFromDisk() #2DX97q');
   const keys = await getKeysFromDisk({ fs, gitdir });
 
-  /**
-   * TODO TODO TODO TODO TODO TODO TODO TODO
-   * - Fetch
-   * - Checkout master locally
-   */
   cloneLog('encryptedFetch() #JcafjM');
   await encryptedFetch({ fs, http, gitdir, gitApi, remoteUrl: url, keys });
   cloneLog('getEncryptedRefObjectId() #7BiUlT');
@@ -316,8 +311,7 @@ export const simpleEncryptedClone = async (
   if (typeof headCommitObjectId === 'undefined') {
     throw new Error('Failed to get HEAD commit from encrypted repo. #JgEf7I');
   }
-  // cloneLog('git.branch() #20gPYQ');
-  // await git.branch({ fs, gitdir, ref: headCommitObjectId, checkout: true });
+
   cloneLog('git.writeRef() #ViIfJo');
   await git.writeRef({
     fs,
@@ -330,6 +324,7 @@ export const simpleEncryptedClone = async (
   await git.checkout({ fs, dir });
 
   cloneLog('simplePullWithOptionalEncryption() #SO1xTQ');
+
   // TODO Get the HEAD encrypted ref then hand over to the simple pull
   await simplePullWithOptionalEncryption({
     fs,
