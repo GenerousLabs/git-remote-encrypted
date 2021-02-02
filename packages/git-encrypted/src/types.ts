@@ -98,7 +98,6 @@ export type EncryptedRemoteParams = {
    */
   // Disable the remote branch for now, it's complicated
   // encryptedRemoteBranch: string;
-  encryptedRemoteHeaders?: Headers;
 };
 
 export type EncryptedPushPull = (

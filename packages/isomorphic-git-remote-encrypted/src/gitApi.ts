@@ -15,7 +15,6 @@ export const gitApi: GitApi = {
       corsProxy,
       encryptedDir,
       encryptedRemoteUrl,
-      encryptedRemoteHeaders,
       throwOnError = true,
     } = params;
     try {
@@ -31,7 +30,6 @@ export const gitApi: GitApi = {
       await git.clone({
         fs,
         http,
-        headers: encryptedRemoteHeaders,
         corsProxy,
         dir: encryptedDir,
         url: encryptedRemoteUrl,
@@ -43,14 +41,7 @@ export const gitApi: GitApi = {
     }
   },
   pull: async params => {
-    const {
-      fs,
-      http,
-      corsProxy,
-      encryptedDir,
-      encryptedRemoteHeaders,
-      throwOnError = true,
-    } = params;
+    const { fs, http, corsProxy, encryptedDir, throwOnError = true } = params;
     try {
       logPull(
         'Invoked #ttv76Y',
@@ -59,7 +50,6 @@ export const gitApi: GitApi = {
       await git.pull({
         fs,
         http,
-        headers: encryptedRemoteHeaders,
         corsProxy,
         dir: encryptedDir,
         author: {
@@ -73,14 +63,7 @@ export const gitApi: GitApi = {
     }
   },
   push: async params => {
-    const {
-      fs,
-      http,
-      corsProxy,
-      encryptedDir,
-      encryptedRemoteHeaders,
-      throwOnError = true,
-    } = params;
+    const { fs, http, corsProxy, encryptedDir, throwOnError = true } = params;
     try {
       logPush(
         'Invoked #JCwPKA',
@@ -89,7 +72,6 @@ export const gitApi: GitApi = {
       await git.push({
         fs,
         http,
-        headers: encryptedRemoteHeaders,
         corsProxy,
         dir: encryptedDir,
       });
