@@ -40,6 +40,11 @@ GitRemoteHelper({
         JSON.stringify({ gitdir, remoteUrl, remoteName })
       );
 
+      // TODO3 Split the `remoteUrl` into two parts
+      // It might be like `passphrase::git@github.com:foo/bar.git` or it might
+      // not have the passphrase, but it will never have the `encrypted::`
+      // prefix.
+
       // We always need to call `encryptedInit()` before running any other
       // operations. By calling it here we can ensure that it's only called once
       // per invocation of the git-remote-helper.
@@ -47,6 +52,9 @@ GitRemoteHelper({
         ...baseGitParams,
         gitdir,
         encryptedRemoteUrl: remoteUrl,
+        // TODO3 Decide how we initialise repositories via the helper if a
+        // password is not provided, for now, let's just throw.
+        keyDerivationPassword: '',
       });
     },
     list: async ({ gitdir, forPush }) => {

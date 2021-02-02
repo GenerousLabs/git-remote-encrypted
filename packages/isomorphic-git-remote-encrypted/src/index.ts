@@ -246,15 +246,11 @@ export const simplePullWithOptionalEncryption = async (
 export const simpleEncryptedClone = async (
   params: Omit<PushOrPullParams, 'remote'> & {
     /**
-     * The remote URL, prefixed with `encrypted::` if it is an encrypted repo.
+     * The remote URL, prefixed with `encrypted::passphrase` if it is an
+     * encrypted repo.
      */
     url: string;
-  } & (
-      | {
-          keys: Keys;
-        }
-      | { keysBase64: KeysBase64 }
-    )
+  }
 ) => {
   const {
     fs,
@@ -263,11 +259,12 @@ export const simpleEncryptedClone = async (
     url,
     ref = 'refs/heads/master',
     remoteRef = 'refs/heads/master',
-    ...keysOrKeysBase64
   } = params;
   const gitdir = join(dir, '.git');
 
   cloneLog('Invoked #zdDigE', { dir, gitdir, url, ref, remoteRef });
+
+  // TODO2 Add `keyDerivationPassword` extraction from URL here
 
   const { isEncryptedRemote, encryptedRemoteUrl } = getIsEncryptedRemoteUrl(
     url
@@ -280,14 +277,14 @@ export const simpleEncryptedClone = async (
   // Init a new repo at dir
   await git.init({ fs, dir });
 
-  await saveKeysToDisk({ fs, gitdir, ...keysOrKeysBase64 });
-
   cloneLog('encryptedInit() #kRHgyD');
   await encryptedInit({
     fs,
     http,
     gitdir,
     encryptedRemoteUrl,
+    // TODO2 Set this to the correct value
+    keyDerivationPassword: '',
     gitApi,
   });
 
