@@ -1,7 +1,6 @@
 import { packageLog } from '../log';
 import {
   EncryptedRemoteParams,
-  FS,
   GitBaseParams,
   GitBaseParamsEncrypted,
 } from '../types';
@@ -14,123 +13,9 @@ import {
   getEncryptedObjectsDir,
   getEncryptedRefsDir,
 } from '../utils';
-import { saveKeysToDisk } from './saveKeysToDisk';
+import { ensureKeysExist } from '../crypto';
 
 const log = packageLog.extend('encryptedInit');
-
-// TODO1 Swap `../meta.ts` to `../encryptedMeta.ts`
-
-// TODO1 Move this to `../meta.ts`
-const creatEncryptedMeta = async (): Promise<EncryptedMeta> => {
-  return {
-    version: 1,
-    derivationParams: {
-      // TODO1 Generate a random salt
-      salt: 'generatedrandomsalt',
-      cpuCost: 1024,
-      blockSize: 8,
-      parallelizationCost: 1,
-    },
-  };
-};
-
-// TODO1 Move this to `../meta.ts`
-const readMetaFromDisk = async ({
-  fs,
-  encryptedDir,
-}: {
-  fs: FS;
-  encryptedDir: string;
-}): Promise<EncryptedMeta> => {
-  console.log('#SbXtKQ', fs, encryptedDir);
-  // TODO1 Read from disk
-  return {
-    version: 1,
-    derivationParams: {
-      salt: 'salt',
-      cpuCost: 8,
-      blockSize: 1,
-      parallelizationCost: 1,
-    },
-  };
-};
-
-// TODO1 Move this to `../meta.ts`
-const writeMetaToEncryptedRepo = async ({
-  fs,
-  encryptedDir,
-  meta,
-}: {
-  fs: FS;
-  encryptedDir: string;
-  meta: EncryptedMeta;
-}) => {
-  console.log('#3wQJK9', fs, encryptedDir, meta);
-  // TODO1 Create file
-  // TODO1 Create commit in `.git/encrypted` repo
-};
-
-// TODO1 Convert this to a zod schema, use that to validate the shape of the
-// JSON after reading it from `encrypted.json`
-export type EncryptedMeta = {
-  version: 1;
-  derivationParams: {
-    salt: string;
-    cpuCost: number;
-    blockSize: number;
-    parallelizationCost: number;
-  };
-};
-
-// TODO1 Move this to `../meta.ts`
-const ensureMetaExists = async ({
-  fs,
-  encryptedDir,
-}: Pick<GitBaseParamsEncrypted, 'fs'> & {
-  encryptedDir: string;
-}): Promise<EncryptedMeta> => {
-  const meta = await readMetaFromDisk({ fs, encryptedDir });
-  if (typeof meta !== 'undefined') {
-    return meta;
-  }
-
-  const metaToSave = await creatEncryptedMeta();
-  await writeMetaToEncryptedRepo({ fs, encryptedDir, meta: metaToSave });
-  return metaToSave;
-};
-
-// TODO1 Move this to `../crypto.ts`
-const ensureKeysExist = async ({
-  fs,
-  gitdir,
-  encryptedDir,
-  encryptedKeysDir,
-  keyDerivationPassword,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & {
-  encryptedDir: string;
-  encryptedKeysDir: string;
-  keyDerivationPassword?: string;
-}) => {
-  const encryptedKeysDirectoryExists = await doesDirectoryExist({
-    fs,
-    path: encryptedKeysDir,
-  });
-
-  if (encryptedKeysDirectoryExists) {
-    return;
-  }
-
-  if (typeof keyDerivationPassword === 'undefined') {
-    throw new Error(
-      'Cannot initialise without key derivation password #xvoEqa'
-    );
-  }
-
-  const meta = await ensureMetaExists({ fs, encryptedDir });
-
-  const keys = deriveKeys({ ...meta.derivationParams, keyDerivationPassword });
-  await saveKeysToDisk({ fs, gitdir, keys });
-};
 
 const ensureDirectoriesExist = async ({
   fs,

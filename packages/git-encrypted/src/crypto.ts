@@ -2,7 +2,11 @@ import { arrayToHex, hexToArray } from 'enc-utils';
 import { hash, randomBytes, secretbox } from 'tweetnacl';
 import { decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
 import { NONCE_LENGTH } from './constants';
-import { Keys } from './types';
+import { Keys, GitBaseParamsEncrypted } from './types';
+import { doesDirectoryExist } from './utils';
+import { deriveKeys } from './keyDerivation';
+import { saveKeysToDisk } from './api/saveKeysToDisk';
+import { ensureMetaExists } from './encryptedMeta';
 
 export const concat = (a: Uint8Array, b: Uint8Array) => {
   const length = a.length + b.length;
@@ -162,4 +166,36 @@ export const decryptFileContentsOnly = async ({
   );
 
   return decryptedContents;
+};
+
+export const ensureKeysExist = async ({
+  fs,
+  gitdir,
+  encryptedDir,
+  encryptedKeysDir,
+  keyDerivationPassword,
+}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & {
+  encryptedDir: string;
+  encryptedKeysDir: string;
+  keyDerivationPassword?: string;
+}) => {
+  const encryptedKeysDirectoryExists = await doesDirectoryExist({
+    fs,
+    path: encryptedKeysDir,
+  });
+
+  if (encryptedKeysDirectoryExists) {
+    return;
+  }
+
+  if (typeof keyDerivationPassword === 'undefined') {
+    throw new Error(
+      'Cannot initialise without key derivation password #xvoEqa'
+    );
+  }
+
+  const meta = await ensureMetaExists({ fs, encryptedDir });
+
+  const keys = await deriveKeys({ ...meta.derivationParams, password: keyDerivationPassword });
+  await saveKeysToDisk({ fs, gitdir, keys });
 };
