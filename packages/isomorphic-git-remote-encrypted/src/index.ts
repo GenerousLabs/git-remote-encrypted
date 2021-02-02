@@ -49,12 +49,26 @@ const pushLog = packageLog.extend('simplePush');
 const pullLog = packageLog.extend('simplePull');
 const cloneLog = packageLog.extend('simpleClone');
 
+// If this function return `isEncryptedRemote` equal to `true`, then the
+// `encryptedRemoteUrl` parameter must be a `string` and not `undefined`. We
+// define the type definition of this function 3 times so that TypeScript
+// understands this. The first (in this case generic) type seems to be the one
+// used by TypeScript, even though multiple sources suggest it is the last
+// version used. Unclear why, but with the generic type repeated as the first
+// overload, TypeScript successfully understands the type definition.
 export function getIsEncryptedRemoteUrl(
   url: string
 ): {
   url: string;
-  isEncryptedRemote: true;
-  encryptedRemoteUrl: string;
+  isEncryptedRemote: boolean;
+  encryptedRemoteUrl: string | undefined;
+};
+export function getIsEncryptedRemoteUrl(
+  url: string
+): {
+  url: string;
+  isEncryptedRemote: false;
+  encryptedRemoteUrl: undefined;
 };
 export function getIsEncryptedRemoteUrl(
   url: string
