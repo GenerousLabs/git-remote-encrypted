@@ -18,6 +18,8 @@ import { saveKeysToDisk } from './saveKeysToDisk';
 
 const log = packageLog.extend('encryptedInit');
 
+// TODO1 Swap `../meta.ts` to `../encryptedMeta.ts`
+
 // TODO1 Move this to `../meta.ts`
 const creatEncryptedMeta = async (): Promise<EncryptedMeta> => {
   return {
@@ -68,6 +70,8 @@ const writeMetaToEncryptedRepo = async ({
   // TODO1 Create commit in `.git/encrypted` repo
 };
 
+// TODO1 Convert this to a zod schema, use that to validate the shape of the
+// JSON after reading it from `encrypted.json`
 export type EncryptedMeta = {
   version: 1;
   derivationParams: {
@@ -101,11 +105,11 @@ const ensureKeysExist = async ({
   gitdir,
   encryptedDir,
   encryptedKeysDir,
-  keyDerivatinoPassword,
+  keyDerivationPassword,
 }: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & {
   encryptedDir: string;
   encryptedKeysDir: string;
-  keyDerivatinoPassword?: string;
+  keyDerivationPassword?: string;
 }) => {
   const encryptedKeysDirectoryExists = await doesDirectoryExist({
     fs,
@@ -116,7 +120,7 @@ const ensureKeysExist = async ({
     return;
   }
 
-  if (typeof keyDerivatinoPassword === 'undefined') {
+  if (typeof keyDerivationPassword === 'undefined') {
     throw new Error(
       'Cannot initialise without key derivation password #xvoEqa'
     );
@@ -159,8 +163,6 @@ export const encryptedInit = async (
        * file does not already contain the required keys.
        */
       keyDerivationPassword?: string;
-      // Would this be a better name?
-      // keyDerivationPassphrase: string;
     }
 ) => {
   const { fs } = params;
