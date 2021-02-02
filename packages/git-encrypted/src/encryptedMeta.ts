@@ -5,18 +5,27 @@ import { FS, GitBaseParamsEncrypted } from './types';
 import { generateKey } from './crypto';
 import { encryptedRepoCommit } from './git';
 
-const META_FILENAME = "encrypted.json";
+const META_FILENAME = 'encrypted.json';
 
 const EncryptedMetaSchema = zod.object({
   version: zod.literal(1),
   derivationParams: zod.object({
     salt: zod.string().nonempty(),
-    cpuCost: zod.number().int().positive(),
-    blockSize: zod.number().int().positive(),
-    parallelizationCost: zod.number().int().positive()
-  })
+    cpuCost: zod
+      .number()
+      .int()
+      .positive(),
+    blockSize: zod
+      .number()
+      .int()
+      .positive(),
+    parallelizationCost: zod
+      .number()
+      .int()
+      .positive(),
+  }),
 });
-type EncryptedMeta = zod.infer<typeof EncryptedMetaSchema>
+type EncryptedMeta = zod.infer<typeof EncryptedMetaSchema>;
 
 const createEncryptedMeta = (): EncryptedMeta => {
   return {
@@ -30,9 +39,9 @@ const createEncryptedMeta = (): EncryptedMeta => {
   };
 };
 
-const getMetaPath = ({encryptedDir}: { encryptedDir: string }) => {
+const getMetaPath = ({ encryptedDir }: { encryptedDir: string }) => {
   return join(encryptedDir, META_FILENAME);
-}
+};
 
 const readMetaFromDisk = async ({
   fs,
@@ -43,7 +52,7 @@ const readMetaFromDisk = async ({
 }): Promise<EncryptedMeta> => {
   console.log('#SbXtKQ', fs, encryptedDir);
 
-  const metaPath = getMetaPath({encryptedDir});
+  const metaPath = getMetaPath({ encryptedDir });
   const metaJson = await fs.promises.readFile(metaPath, 'utf8');
   const meta = JSON.parse(metaJson);
   EncryptedMetaSchema.parse(meta);
@@ -61,13 +70,13 @@ const writeMetaToEncryptedRepo = async ({
   meta: EncryptedMeta;
 }) => {
   console.log('#3wQJK9', fs, encryptedDir, meta);
-  const metaPath = getMetaPath({encryptedDir});
+  const metaPath = getMetaPath({ encryptedDir });
 
   EncryptedMetaSchema.parse(meta);
   const metaJson = JSON.stringify(meta);
 
-  await fs.promises.writeFile(metaPath, metaJson, { encoding: 'utf8'});
-  await encryptedRepoCommit({fs, gitdir: encryptedDir})
+  await fs.promises.writeFile(metaPath, metaJson, { encoding: 'utf8' });
+  await encryptedRepoCommit({ fs, gitdir: encryptedDir });
 };
 
 export const ensureMetaExists = async ({

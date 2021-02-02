@@ -7,7 +7,7 @@ export const deriveKey = async ({
   cpuCost,
   blockSize,
   parallelizationCost,
-  keyLength
+  keyLength,
 }: {
   password: string;
   salt: string;
@@ -34,7 +34,7 @@ export const deriveKeys = async ({
   salt,
   cpuCost,
   blockSize,
-  parallelizationCost
+  parallelizationCost,
 }: {
   password: string;
   salt: string;
@@ -49,12 +49,12 @@ export const deriveKeys = async ({
     cpuCost,
     blockSize,
     parallelizationCost,
-    keyLength
+    keyLength,
   });
 
   return {
     content: derivedKey.slice(0, 32),
     filename: derivedKey.slice(32, 64),
-    salt: derivedKey.slice(64, 96)
+    salt: derivedKey.slice(64, 96),
   };
 };

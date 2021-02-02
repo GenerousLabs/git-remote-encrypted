@@ -11,7 +11,7 @@ describe('keyDerivation', () => {
           cpuCost: 1024,
           blockSize: 8,
           parallelizationCost: 1,
-          keyLength: 96
+          keyLength: 96,
         })
       ).resolves.toMatchSnapshot();
     });
@@ -45,21 +45,20 @@ describe('keyDerivation', () => {
         cpuCost,
         blockSize,
         parallelizationCost,
-        keyLength
+        keyLength,
       });
       const key2Promise: Promise<Keys> = deriveKeys({
         password,
         salt,
         cpuCost,
         blockSize,
-        parallelizationCost
+        parallelizationCost,
       });
 
       key2Promise.then(key2 => {
         const mergedArray = new Uint8Array(
-          key2.content.length +
-          key2.filename.length +
-          key2.salt.length);
+          key2.content.length + key2.filename.length + key2.salt.length
+        );
 
         mergedArray.set(key2.content);
         mergedArray.set(key2.filename, key2.content.length);
