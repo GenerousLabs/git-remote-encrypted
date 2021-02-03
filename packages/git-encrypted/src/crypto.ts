@@ -174,7 +174,7 @@ export const ensureKeysExist = async ({
   encryptedDir,
   encryptedKeysDir,
   keyDerivationPassword,
-}: Pick<GitBaseParamsEncrypted, 'fs' | 'gitdir'> & {
+}: GitBaseOfflineParams & {
   encryptedDir: string;
   encryptedKeysDir: string;
   keyDerivationPassword?: string;
