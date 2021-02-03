@@ -196,6 +196,9 @@ export const ensureKeysExist = async ({
 
   const meta = await ensureMetaExists({ fs, encryptedDir });
 
-  const keys = await deriveKeys({ ...meta.derivationParams, password: keyDerivationPassword });
+  const keys = await deriveKeys({
+    ...meta.derivationParams,
+    password: keyDerivationPassword,
+  });
   await saveKeysToDisk({ fs, gitdir, keys });
 };
