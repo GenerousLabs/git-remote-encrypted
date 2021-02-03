@@ -5,7 +5,7 @@ import { saveKeysToDisk } from './api/saveKeysToDisk';
 import { NONCE_LENGTH } from './constants';
 import { ensureMetaExists } from './encryptedMeta';
 import { deriveKeys } from './keyDerivation';
-import { GitBaseOfflineParams, GitBaseParamsEncrypted, Keys } from './types';
+import { GitBaseOfflineParams, Keys } from './types';
 import { doesDirectoryExist } from './utils';
 
 export const concat = (a: Uint8Array, b: Uint8Array) => {
