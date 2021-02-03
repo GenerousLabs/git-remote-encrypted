@@ -1,12 +1,12 @@
 import { arrayToHex, hexToArray } from 'enc-utils';
 import { hash, randomBytes, secretbox } from 'tweetnacl';
 import { decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
-import { NONCE_LENGTH } from './constants';
-import { Keys, GitBaseParamsEncrypted } from './types';
-import { doesDirectoryExist } from './utils';
-import { deriveKeys } from './keyDerivation';
 import { saveKeysToDisk } from './api/saveKeysToDisk';
+import { NONCE_LENGTH } from './constants';
 import { ensureMetaExists } from './encryptedMeta';
+import { deriveKeys } from './keyDerivation';
+import { GitBaseOfflineParams, GitBaseParamsEncrypted, Keys } from './types';
+import { doesDirectoryExist } from './utils';
 
 export const concat = (a: Uint8Array, b: Uint8Array) => {
   const length = a.length + b.length;
