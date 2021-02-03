@@ -4,7 +4,7 @@ import { generateKey } from './crypto';
 import { encryptedRepoCommit } from './git';
 import { FS, GitBaseParamsEncrypted } from './types';
 
-const META_FILENAME = 'encrypted.json';
+const ENCRYPTED_META_FILENAME = 'encrypted.json';
 
 const EncryptedMetaSchema = zod.object({
   version: zod.literal(1),
@@ -39,7 +39,7 @@ const createEncryptedMeta = (): EncryptedMeta => {
 };
 
 const getMetaPath = ({ encryptedDir }: { encryptedDir: string }) => {
-  return join(encryptedDir, META_FILENAME);
+  return join(encryptedDir, ENCRYPTED_META_FILENAME);
 };
 
 const readMetaFromDisk = async ({
