@@ -11,9 +11,8 @@ import git, { HttpClient } from 'isomorphic-git';
 import { superpathjoin as join } from 'superpathjoin';
 import { gitApi } from './gitApi';
 import { packageLog } from './packageLog';
+import { getIsEncryptedRemoteUrl } from './utils';
 export { gitApi } from './gitApi';
-
-const ENCRYPTED_PREFIX = 'encrypted::' as const;
 
 type PushOrPullParams = {
   fs: FS;
@@ -45,67 +44,6 @@ type PushOrPullParams = {
 const pushLog = packageLog.extend('simplePush');
 const pullLog = packageLog.extend('simplePull');
 const cloneLog = packageLog.extend('simpleClone');
-
-// If this function return `isEncryptedRemote` equal to `true`, then the
-// `encryptedRemoteUrl` parameter must be a `string` and not `undefined`. We
-// define the type definition of this function 3 times so that TypeScript
-// understands this. The first (in this case generic) type seems to be the one
-// used by TypeScript, even though multiple sources suggest it is the last
-// version used. Unclear why, but with the generic type repeated as the first
-// overload, TypeScript successfully understands the type definition.
-
-// TODO: this does not work as intended: encryptedRemoteUrl should be of type
-// "string" if isEncryptedUrl is "true", but it is of type "string | undefined"
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: boolean;
-  encryptedRemoteUrl: string | undefined;
-  keyDerivationPassword: string | undefined;
-};
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: false;
-  encryptedRemoteUrl: undefined;
-  keyDerivationPassword: undefined;
-};
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: true;
-  encryptedRemoteUrl: string;
-  keyDerivationPassword: string | undefined;
-};
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: boolean;
-  encryptedRemoteUrl: string | undefined;
-  keyDerivationPassword: string | undefined;
-} {
-  const isEncryptedRemote = url.startsWith(ENCRYPTED_PREFIX);
-  const encryptedRemoteUrl = isEncryptedRemote
-    ? url.substr(ENCRYPTED_PREFIX.length)
-    : undefined;
-
-  let keyDerivationPassword = undefined;
-  const encryptedUrlComponents = encryptedRemoteUrl?.split('::');
-  if (encryptedUrlComponents?.length === 2) {
-    keyDerivationPassword = encryptedUrlComponents[0];
-  }
-
-  return {
-    url,
-    isEncryptedRemote,
-    encryptedRemoteUrl,
-    keyDerivationPassword,
-  };
-}
 
 export const getMaybeEncrtyptedRemoteUrl = async (
   params: Pick<PushOrPullParams, 'fs' | 'remote' | 'dir'>
@@ -179,7 +117,10 @@ export const simplePushWithOptionalEncryption = async (params: {
     gitdir,
     keys,
     refs: [{ src: ref, dst: remoteRef, force: false }],
-    remoteUrl: encryptedRemoteUrl as string,
+    // NOTE: We need to type cast this here because TypeScript cannot understand
+    // from the `if (!isEncryptedRemote)` check above, that we now know this
+    // will definitely be a string.
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
   });
 };
 
@@ -220,7 +161,7 @@ export const simplePullWithOptionalEncryption = async (
     gitApi,
     gitdir,
     keys,
-    remoteUrl: encryptedRemoteUrl as string,
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
   });
 
   const commitId = await getEncryptedRefObjectId({
@@ -306,7 +247,14 @@ export const simpleEncryptedClone = async (
   const keys = await getKeysFromDisk({ fs, gitdir });
 
   cloneLog('encryptedFetch() #JcafjM');
-  await encryptedFetch({ fs, http, gitdir, gitApi, remoteUrl: url, keys });
+  await encryptedFetch({
+    fs,
+    http,
+    gitdir,
+    gitApi,
+    encryptedRemoteUrl: url,
+    keys,
+  });
   cloneLog('getEncryptedRefObjectId() #7BiUlT');
   const headCommitObjectId = await getEncryptedRefObjectId({
     fs,

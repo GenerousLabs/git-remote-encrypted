@@ -1,12 +1,12 @@
 import { superpathjoin as join } from 'superpathjoin';
 import zod from 'zod';
+import { ENCRYPTED_META_FILENAME } from './constants';
 import { encryptedRepoCommit } from './git';
 import { FS, GitBaseParamsEncrypted } from './types';
-import { generateKey } from './utils';
+import { doesFileExist, generateKey } from './utils';
 
-const ENCRYPTED_META_FILENAME = 'encrypted.json';
-const CREATE_ENCRYPTED_META_PARAMS = {
-  saltLength: 1024,
+const DERIVATION_SALT_LENGTH = 32;
+const DERIVATION_PARMS = {
   cpuCost: 1024,
   blockSize: 8,
   parallelizationCost: 1,
@@ -33,14 +33,12 @@ const EncryptedMetaSchema = zod.object({
 type EncryptedMeta = zod.infer<typeof EncryptedMetaSchema>;
 
 const createEncryptedMeta = (): EncryptedMeta => {
-  const salt = generateKey(CREATE_ENCRYPTED_META_PARAMS.saltLength);
+  const salt = generateKey(DERIVATION_SALT_LENGTH);
   return {
     version: 1,
     derivationParams: {
+      ...DERIVATION_PARMS,
       salt: salt,
-      cpuCost: CREATE_ENCRYPTED_META_PARAMS.cpuCost,
-      blockSize: CREATE_ENCRYPTED_META_PARAMS.blockSize,
-      parallelizationCost: CREATE_ENCRYPTED_META_PARAMS.parallelizationCost,
     },
   };
 };
@@ -55,8 +53,15 @@ const readMetaFromDisk = async ({
 }: {
   fs: FS;
   encryptedDir: string;
-}): Promise<EncryptedMeta> => {
+}): Promise<EncryptedMeta | undefined> => {
   const metaPath = getMetaPath({ encryptedDir });
+
+  const doesMetaFileExist = await doesFileExist({ fs, path: metaPath });
+
+  if (!doesMetaFileExist) {
+    return;
+  }
+
   const metaJson = await fs.promises.readFile(metaPath, 'utf8');
   const meta = JSON.parse(metaJson);
   EncryptedMetaSchema.parse(meta);

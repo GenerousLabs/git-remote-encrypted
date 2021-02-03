@@ -24,3 +24,5 @@ export const GIT_ENCRYPTED_AUTHOR = {
   name: 'Encryption',
 } as const;
 export const GIT_ENCRYPTED_MESSAGE = 'Encrypted push' as const;
+
+export const ENCRYPTED_META_FILENAME = 'encrypted.json';
