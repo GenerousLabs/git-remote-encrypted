@@ -10,7 +10,12 @@ import {
   encryptFilename,
 } from './crypto';
 import { GitBaseOfflineParams, GitBaseParams, Keys } from './types';
-import { getEncryptedObjectsDir, getEncryptedRefsDir, wrap } from './utils';
+import {
+  ensureDirectoryExists,
+  getEncryptedObjectsDir,
+  getEncryptedRefsDir,
+  wrap,
+} from './utils';
 
 // This is unnecessarily async because the isomorphic-git inflate / deflate code
 // can be async in the browser, so we mirror that here in the hope of
@@ -55,6 +60,20 @@ export const getEncryptedFileDir = ({
   }
 };
 
+export const getEncryptedFilePath = ({
+  gitdir,
+  encryptedFilename,
+  fileType,
+}: {
+  gitdir: string;
+  encryptedFilename: string;
+  fileType: FileType;
+}) => {
+  const dir = getEncryptedFileDir({ gitdir, fileType });
+  const path = join(dir, encryptedFilename);
+  return { dir, path };
+};
+
 export const writeEncryptedFile = async ({
   fs,
   gitdir,
@@ -66,8 +85,17 @@ export const writeEncryptedFile = async ({
   encryptedFilename: string;
   encryptedContent: Uint8Array;
 }) => {
-  const dir = getEncryptedFileDir({ gitdir, fileType });
-  const path = join(dir, encryptedFilename);
+  const { dir, path } = getEncryptedFilePath({
+    gitdir,
+    encryptedFilename,
+    fileType,
+  });
+
+  // NOTE: We ensure that the directory exists for objects because they are
+  // sharded.
+  if (fileType === FileType.object) {
+    await ensureDirectoryExists({ fs, path: dir });
+  }
 
   await fs.promises.writeFile(path, encryptedContent);
 };
@@ -136,17 +164,20 @@ export const readEnryptedObject = async (
   params: GitBaseOfflineParams & { keys: Keys; objectId: string }
 ) => {
   const { fs, gitdir, objectId, keys } = params;
-  const dir = getEncryptedFileDir({ gitdir, fileType: FileType.object });
   const objectIdArray = decodeUTF8(objectId);
 
   const nonce = await createNonce({ salt: keys.salt, input: objectIdArray });
-  const filename = await encryptFilename({
+  const encryptedFilename = await encryptFilename({
     filenameArray: objectIdArray,
     nonce,
     keys,
   });
 
-  const path = join(dir, filename);
+  const { path } = getEncryptedFilePath({
+    gitdir,
+    encryptedFilename,
+    fileType: FileType.object,
+  });
 
   const fileContents = await fs.promises.readFile(path);
 
