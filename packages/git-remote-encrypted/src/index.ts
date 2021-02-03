@@ -10,10 +10,11 @@ import {
   getRefsGitString,
 } from 'git-encrypted';
 import { gitApi } from 'git-encrypted-host-git-api';
-
 import GitRemoteHelper from 'git-remote-helper';
+import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import { packageLog } from './log';
+import { parseRemoteUrl } from './utils';
 
 globalThis['__DEV__'] = process.env.NODE_ENV !== 'production';
 
@@ -40,13 +41,50 @@ GitRemoteHelper({
         JSON.stringify({ gitdir, remoteUrl, remoteName })
       );
 
+      // If this remote has a name, and is of the format `encrypted::::url`
+      // (which means that the password is blank), then we create a password,
+      // add it to the remote URL, and proceed. This allows for secure password
+      // creation on first push.
+      if (remoteUrl.substr(0, 2) === '::') {
+        if (remoteUrl === remoteName) {
+          throw new Error(
+            'Password creation only works with a named remote. #5WsweW'
+          );
+        }
+
+        const keyDerivationPassword = 'foo'; // TODO Generate a random password here
+
+        await git.addRemote({
+          fs,
+          gitdir,
+          remote: remoteName,
+          url: `encrypted::${keyDerivationPassword}${remoteUrl}`,
+          force: true,
+        });
+
+        await encryptedInit({
+          ...baseGitParams,
+          gitdir,
+          // Strip the leading `::` from the URL
+          encryptedRemoteUrl: remoteUrl.substr(2),
+          keyDerivationPassword,
+        });
+
+        return;
+      }
+
+      const { encryptedRemoteUrl, keyDerivationPassword } = parseRemoteUrl({
+        remoteUrl,
+      });
+
       // We always need to call `encryptedInit()` before running any other
       // operations. By calling it here we can ensure that it's only called once
       // per invocation of the git-remote-helper.
       await encryptedInit({
         ...baseGitParams,
         gitdir,
-        encryptedRemoteUrl: remoteUrl,
+        encryptedRemoteUrl,
+        keyDerivationPassword,
       });
     },
     list: async ({ gitdir, forPush }) => {
@@ -70,13 +108,14 @@ GitRemoteHelper({
     handleFetch: async ({ gitdir, refs, remoteUrl }) => {
       logFetch('handleFetch() invoked #nGa2WK', JSON.stringify({ refs }));
 
+      const { encryptedRemoteUrl } = parseRemoteUrl({ remoteUrl });
       const keys = await getKeysFromDisk({ fs, gitdir });
 
       await encryptedFetch({
         ...baseGitParams,
         keys,
         gitdir,
-        remoteUrl,
+        encryptedRemoteUrl,
       });
 
       // Fetch need only return a single newline after it's completed, then it
@@ -89,13 +128,14 @@ GitRemoteHelper({
         JSON.stringify({ refs, gitdir, remoteUrl })
       );
 
+      const { encryptedRemoteUrl } = parseRemoteUrl({ remoteUrl });
       const keys = await getKeysFromDisk({ fs, gitdir });
 
       const results = await encryptedPush({
         ...baseGitParams,
         keys,
         gitdir,
-        remoteUrl,
+        encryptedRemoteUrl,
         refs,
       });
 

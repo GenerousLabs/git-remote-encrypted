@@ -1,3 +1,4 @@
+export { createPassword } from './api/createPassword';
 export { encryptedInit } from './api/encryptedInit';
 export { encryptedPush, EncryptedPushResult } from './api/encryptedPush';
 export { encryptedFetch } from './api/encryptedFetch';

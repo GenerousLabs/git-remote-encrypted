@@ -1,18 +1,17 @@
 import { copyAllEncryptedObjectsToSourceRepo } from '../objects';
-import { GitBaseParamsEncrypted, RemoteUrl } from '../types';
-import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
+import { EncryptedRemoteParams, GitBaseParamsEncrypted } from '../types';
+import { getEncryptedDir } from '../utils';
 
 /**
  * Update the encrypted repo and then copy all its objects into the source repo.
  */
 export const encryptedFetch = async (
-  params: GitBaseParamsEncrypted & RemoteUrl
+  params: GitBaseParamsEncrypted & EncryptedRemoteParams
 ) => {
-  const { remoteUrl, keys, fs } = params;
+  const { encryptedRemoteUrl, keys, fs } = params;
   const { gitdir, gitApi, ...base } = params;
 
   const encryptedDir = getEncryptedDir({ gitdir });
-  const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
 
   // When the source repo is pulling from the encrypted repo, first we need to
   // pull from the encryptedRemote to ensure that we have the latest objects.

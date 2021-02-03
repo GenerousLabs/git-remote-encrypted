@@ -7,8 +7,12 @@ import {
 import { packageLog } from '../log';
 import { copySourceObjectToEncryptedRepo } from '../objects';
 import { writeEncryptedRef } from '../refs';
-import { GitBaseParamsEncrypted, PushRef, RemoteUrl } from '../types';
-import { getEncryptedDir, parseGitRemoteUrl } from '../utils';
+import {
+  EncryptedRemoteParams,
+  GitBaseParamsEncrypted,
+  PushRef,
+} from '../types';
+import { getEncryptedDir } from '../utils';
 import { getEncryptedRefObjectId } from './getEncryptedRefObjectId';
 
 const log = packageLog.extend('encryptedPush');
@@ -25,14 +29,13 @@ export enum EncryptedPushResult {
  */
 export const encryptedPush = async (
   params: GitBaseParamsEncrypted &
-    RemoteUrl & {
+    EncryptedRemoteParams & {
       refs: PushRef[];
     }
 ) => {
   const { gitdir, keys } = params;
-  const { gitApi, remoteUrl, refs, ...gitBaseParams } = params;
+  const { gitApi, encryptedRemoteUrl, refs, ...gitBaseParams } = params;
   const encryptedDir = getEncryptedDir({ gitdir });
-  const { url: encryptedRemoteUrl } = parseGitRemoteUrl({ remoteUrl });
 
   log('Invoked #kGvMKs', JSON.stringify({ gitdir, encryptedRemoteUrl }));
 

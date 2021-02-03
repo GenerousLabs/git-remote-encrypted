@@ -1,8 +1,12 @@
 import { arrayToHex, hexToArray } from 'enc-utils';
-import { hash, randomBytes, secretbox } from 'tweetnacl';
-import { decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
+import { hash, secretbox } from 'tweetnacl';
+import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util';
+import { saveKeysToDisk } from './api/saveKeysToDisk';
 import { NONCE_LENGTH } from './constants';
-import { Keys } from './types';
+import { ensureMetaExists } from './encryptedMeta';
+import { deriveKeys } from './keyDerivation';
+import { GitBaseOfflineParams, Keys } from './types';
+import { doesDirectoryExist } from './utils';
 
 export const concat = (a: Uint8Array, b: Uint8Array) => {
   const length = a.length + b.length;
@@ -17,9 +21,6 @@ export const split = (combined: Uint8Array, length: number) => {
   const b = combined.slice(length);
   return [a, b];
 };
-
-export const generateKey = (length: number) =>
-  encodeBase64(randomBytes(length));
 
 /**
  * Given an input and a salt, combine them into an nonce of the correct length.
@@ -162,4 +163,39 @@ export const decryptFileContentsOnly = async ({
   );
 
   return decryptedContents;
+};
+
+export const ensureKeysExist = async ({
+  fs,
+  gitdir,
+  encryptedDir,
+  encryptedKeysDir,
+  keyDerivationPassword,
+}: GitBaseOfflineParams & {
+  encryptedDir: string;
+  encryptedKeysDir: string;
+  keyDerivationPassword?: string;
+}) => {
+  const encryptedKeysDirectoryExists = await doesDirectoryExist({
+    fs,
+    path: encryptedKeysDir,
+  });
+
+  if (encryptedKeysDirectoryExists) {
+    return;
+  }
+
+  if (typeof keyDerivationPassword === 'undefined') {
+    throw new Error(
+      'Cannot initialise without key derivation password #xvoEqa'
+    );
+  }
+
+  const meta = await ensureMetaExists({ fs, encryptedDir });
+
+  const keys = await deriveKeys({
+    ...meta.derivationParams,
+    password: keyDerivationPassword,
+  });
+  await saveKeysToDisk({ fs, gitdir, keys });
 };

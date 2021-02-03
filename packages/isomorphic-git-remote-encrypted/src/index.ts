@@ -6,17 +6,13 @@ import {
   getEncryptedRefObjectId,
   getKeysFromDisk,
   GIT_ENCRYPTED_AUTHOR,
-  Keys,
-  KeysBase64,
-  saveKeysToDisk,
 } from 'git-encrypted';
 import git, { HttpClient } from 'isomorphic-git';
 import { superpathjoin as join } from 'superpathjoin';
 import { gitApi } from './gitApi';
 import { packageLog } from './packageLog';
+import { getIsEncryptedRemoteUrl } from './utils';
 export { gitApi } from './gitApi';
-
-const ENCRYPTED_PREFIX = 'encrypted::' as const;
 
 type PushOrPullParams = {
   fs: FS;
@@ -48,39 +44,6 @@ type PushOrPullParams = {
 const pushLog = packageLog.extend('simplePush');
 const pullLog = packageLog.extend('simplePull');
 const cloneLog = packageLog.extend('simpleClone');
-
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: true;
-  encryptedRemoteUrl: string;
-};
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: true;
-  encryptedRemoteUrl: string;
-};
-export function getIsEncryptedRemoteUrl(
-  url: string
-): {
-  url: string;
-  isEncryptedRemote: boolean;
-  encryptedRemoteUrl: string | undefined;
-} {
-  const isEncryptedRemote = url.startsWith(ENCRYPTED_PREFIX);
-  const encryptedRemoteUrl = isEncryptedRemote
-    ? url.substr(ENCRYPTED_PREFIX.length)
-    : undefined;
-
-  return {
-    url,
-    isEncryptedRemote,
-    encryptedRemoteUrl,
-  };
-}
 
 export const getMaybeEncrtyptedRemoteUrl = async (
   params: Pick<PushOrPullParams, 'fs' | 'remote' | 'dir'>
@@ -154,7 +117,10 @@ export const simplePushWithOptionalEncryption = async (params: {
     gitdir,
     keys,
     refs: [{ src: ref, dst: remoteRef, force: false }],
-    remoteUrl: encryptedRemoteUrl,
+    // NOTE: We need to type cast this here because TypeScript cannot understand
+    // from the `if (!isEncryptedRemote)` check above, that we now know this
+    // will definitely be a string.
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
   });
 };
 
@@ -195,7 +161,7 @@ export const simplePullWithOptionalEncryption = async (
     gitApi,
     gitdir,
     keys,
-    remoteUrl: encryptedRemoteUrl,
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
   });
 
   const commitId = await getEncryptedRefObjectId({
@@ -232,15 +198,11 @@ export const simplePullWithOptionalEncryption = async (
 export const simpleEncryptedClone = async (
   params: Omit<PushOrPullParams, 'remote'> & {
     /**
-     * The remote URL, prefixed with `encrypted::` if it is an encrypted repo.
+     * The remote URL, prefixed with `encrypted::passphrase` if it is an
+     * encrypted repo.
      */
     url: string;
-  } & (
-      | {
-          keys: Keys;
-        }
-      | { keysBase64: KeysBase64 }
-    )
+  }
 ) => {
   const {
     fs,
@@ -249,15 +211,16 @@ export const simpleEncryptedClone = async (
     url,
     ref = 'refs/heads/master',
     remoteRef = 'refs/heads/master',
-    ...keysOrKeysBase64
   } = params;
   const gitdir = join(dir, '.git');
 
   cloneLog('Invoked #zdDigE', { dir, gitdir, url, ref, remoteRef });
 
-  const { isEncryptedRemote, encryptedRemoteUrl } = getIsEncryptedRemoteUrl(
-    url
-  );
+  const {
+    isEncryptedRemote,
+    encryptedRemoteUrl,
+    keyDerivationPassword,
+  } = getIsEncryptedRemoteUrl(url);
 
   if (!isEncryptedRemote) {
     throw new Error('Remote url without encrypted:: supplied #wWsiGr');
@@ -266,14 +229,13 @@ export const simpleEncryptedClone = async (
   // Init a new repo at dir
   await git.init({ fs, dir });
 
-  await saveKeysToDisk({ fs, gitdir, ...keysOrKeysBase64 });
-
   cloneLog('encryptedInit() #kRHgyD');
   await encryptedInit({
     fs,
     http,
     gitdir,
-    encryptedRemoteUrl,
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
+    keyDerivationPassword: keyDerivationPassword as string,
     gitApi,
   });
 
@@ -284,13 +246,15 @@ export const simpleEncryptedClone = async (
   cloneLog('getKeysFromDisk() #2DX97q');
   const keys = await getKeysFromDisk({ fs, gitdir });
 
-  /**
-   * TODO TODO TODO TODO TODO TODO TODO TODO
-   * - Fetch
-   * - Checkout master locally
-   */
   cloneLog('encryptedFetch() #JcafjM');
-  await encryptedFetch({ fs, http, gitdir, gitApi, remoteUrl: url, keys });
+  await encryptedFetch({
+    fs,
+    http,
+    gitdir,
+    gitApi,
+    encryptedRemoteUrl: url,
+    keys,
+  });
   cloneLog('getEncryptedRefObjectId() #7BiUlT');
   const headCommitObjectId = await getEncryptedRefObjectId({
     fs,
@@ -302,8 +266,7 @@ export const simpleEncryptedClone = async (
   if (typeof headCommitObjectId === 'undefined') {
     throw new Error('Failed to get HEAD commit from encrypted repo. #JgEf7I');
   }
-  // cloneLog('git.branch() #20gPYQ');
-  // await git.branch({ fs, gitdir, ref: headCommitObjectId, checkout: true });
+
   cloneLog('git.writeRef() #ViIfJo');
   await git.writeRef({
     fs,
@@ -316,6 +279,7 @@ export const simpleEncryptedClone = async (
   await git.checkout({ fs, dir });
 
   cloneLog('simplePullWithOptionalEncryption() #SO1xTQ');
+
   // TODO Get the HEAD encrypted ref then hand over to the simple pull
   await simplePullWithOptionalEncryption({
     fs,

@@ -69,6 +69,7 @@
     "isomorphic-git": "^1.8.0",
     "pako": "^1.0.11",
     "remeda": "^0.0.23",
+    "scrypt-js": "^3.0.1",
     "superpathjoin": "^2.0.1",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",

@@ -187,10 +187,10 @@ const logE = log.extend('encryptedRepoAddAndPush');
 const logENoisy = logE.extend('noisy');
 
 /**
- * `git add . && git commit && git push` on the encrypted repo
+ * `git add . && git commit` on the encrypted repo
  * @returns boolean True if a new commit was created, false if not
  */
-export const encryptedRepoCommit = async (params: GitBaseParams) => {
+export const encryptedRepoCommit = async (params: GitBaseOfflineParams) => {
   const { fs, gitdir } = params;
 
   // In the context of this function, all operations happen on the encrypted
