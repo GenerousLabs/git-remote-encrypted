@@ -1,6 +1,6 @@
 import { arrayToHex, hexToArray } from 'enc-utils';
-import { hash, randomBytes, secretbox } from 'tweetnacl';
-import { decodeUTF8, encodeBase64, encodeUTF8 } from 'tweetnacl-util';
+import { hash, secretbox } from 'tweetnacl';
+import { decodeUTF8, encodeUTF8 } from 'tweetnacl-util';
 import { saveKeysToDisk } from './api/saveKeysToDisk';
 import { NONCE_LENGTH } from './constants';
 import { ensureMetaExists } from './encryptedMeta';
@@ -21,9 +21,6 @@ export const split = (combined: Uint8Array, length: number) => {
   const b = combined.slice(length);
   return [a, b];
 };
-
-export const generateKey = (length: number) =>
-  encodeBase64(randomBytes(length));
 
 /**
  * Given an input and a salt, combine them into an nonce of the correct length.

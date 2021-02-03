@@ -1,4 +1,6 @@
 import { superpathjoin as join } from 'superpathjoin';
+import { randomBytes } from 'tweetnacl';
+import { encodeBase64 } from 'tweetnacl-util';
 import {
   ENCRYPTED_DIR,
   ENCRYPTED_KEYS_DIR,
@@ -7,6 +9,10 @@ import {
   REFS_DIR,
 } from './constants';
 import { FS, GitBaseParams, RemoteUrl } from './types';
+
+// NOTE: We put this here to avoid circular dependencies
+export const generateKey = (length: number) =>
+  encodeBase64(randomBytes(length));
 
 const NOT_FOUND_ERROR_CODE = 'ENOENT';
 

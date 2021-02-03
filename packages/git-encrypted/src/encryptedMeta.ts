@@ -1,8 +1,8 @@
 import { superpathjoin as join } from 'superpathjoin';
 import zod from 'zod';
-import { generateKey } from './crypto';
 import { encryptedRepoCommit } from './git';
 import { FS, GitBaseParamsEncrypted } from './types';
+import { generateKey } from './utils';
 
 const ENCRYPTED_META_FILENAME = 'encrypted.json';
 const CREATE_ENCRYPTED_META_PARAMS = {
