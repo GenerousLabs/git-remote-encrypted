@@ -56,8 +56,6 @@ const readMetaFromDisk = async ({
   fs: FS;
   encryptedDir: string;
 }): Promise<EncryptedMeta> => {
-  console.log('#SbXtKQ', fs, encryptedDir);
-
   const metaPath = getMetaPath({ encryptedDir });
   const metaJson = await fs.promises.readFile(metaPath, 'utf8');
   const meta = JSON.parse(metaJson);
@@ -75,7 +73,6 @@ const writeMetaToEncryptedRepo = async ({
   encryptedDir: string;
   meta: EncryptedMeta;
 }) => {
-  console.log('#3wQJK9', fs, encryptedDir, meta);
   const metaPath = getMetaPath({ encryptedDir });
 
   EncryptedMetaSchema.parse(meta);
