@@ -90,7 +90,7 @@ export type RemoteUrl = {
 export type EncryptedRemoteParams = {
   /**
    * The encrypted remote URL, as it should be passed to git. So already
-   * stripped of all the `encrypted::` prefix and the `#main` branch suffix.
+   * stripped of all the `encrypted::` prefix and any password.
    */
   encryptedRemoteUrl: string;
   /**
