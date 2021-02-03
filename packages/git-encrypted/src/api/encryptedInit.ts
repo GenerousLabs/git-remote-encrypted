@@ -77,7 +77,14 @@ export const encryptedInit = async (
 
   await gitApi.clone({ ...base, encryptedDir });
 
-  await ensureKeysExist({ fs, gitdir, encryptedDir, encryptedKeysDir });
+  const { keyDerivationPassword } = params;
+  await ensureKeysExist({
+    fs,
+    gitdir,
+    encryptedDir,
+    encryptedKeysDir,
+    keyDerivationPassword,
+  });
 
   // NOTE: We need to run this AFTER the clone because otherwise git complains
   // of trying to clone into a not empty directory.
