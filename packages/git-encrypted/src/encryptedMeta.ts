@@ -9,7 +9,7 @@ const CREATE_ENCRYPTED_META_PARAMS = {
   saltLength: 1024,
   cpuCost: 1024,
   blockSize: 8,
-  parallelizationCost: 1
+  parallelizationCost: 1,
 };
 
 const EncryptedMetaSchema = zod.object({
