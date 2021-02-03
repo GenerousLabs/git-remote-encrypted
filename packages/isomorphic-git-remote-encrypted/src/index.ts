@@ -5,7 +5,7 @@ import {
   FS,
   getEncryptedRefObjectId,
   getKeysFromDisk,
-  GIT_ENCRYPTED_AUTHOR
+  GIT_ENCRYPTED_AUTHOR,
 } from 'git-encrypted';
 import git, { HttpClient } from 'isomorphic-git';
 import { superpathjoin as join } from 'superpathjoin';
@@ -53,12 +53,16 @@ const cloneLog = packageLog.extend('simpleClone');
 // used by TypeScript, even though multiple sources suggest it is the last
 // version used. Unclear why, but with the generic type repeated as the first
 // overload, TypeScript successfully understands the type definition.
+
+// TODO: this does not work as intended: encryptedRemoteUrl should be of type
+// "string" if isEncryptedUrl is "true", but it is of type "string | undefined"
 export function getIsEncryptedRemoteUrl(
   url: string
 ): {
   url: string;
   isEncryptedRemote: boolean;
   encryptedRemoteUrl: string | undefined;
+  keyDerivationPassword: string | undefined;
 };
 export function getIsEncryptedRemoteUrl(
   url: string
@@ -66,6 +70,7 @@ export function getIsEncryptedRemoteUrl(
   url: string;
   isEncryptedRemote: false;
   encryptedRemoteUrl: undefined;
+  keyDerivationPassword: undefined;
 };
 export function getIsEncryptedRemoteUrl(
   url: string
@@ -73,6 +78,7 @@ export function getIsEncryptedRemoteUrl(
   url: string;
   isEncryptedRemote: true;
   encryptedRemoteUrl: string;
+  keyDerivationPassword: string | undefined;
 };
 export function getIsEncryptedRemoteUrl(
   url: string
@@ -80,16 +86,24 @@ export function getIsEncryptedRemoteUrl(
   url: string;
   isEncryptedRemote: boolean;
   encryptedRemoteUrl: string | undefined;
+  keyDerivationPassword: string | undefined;
 } {
   const isEncryptedRemote = url.startsWith(ENCRYPTED_PREFIX);
   const encryptedRemoteUrl = isEncryptedRemote
     ? url.substr(ENCRYPTED_PREFIX.length)
     : undefined;
 
+  let keyDerivationPassword = undefined;
+  const encryptedUrlComponents = encryptedRemoteUrl?.split('::');
+  if (encryptedUrlComponents?.length === 2) {
+    keyDerivationPassword = encryptedUrlComponents[0];
+  }
+
   return {
     url,
     isEncryptedRemote,
     encryptedRemoteUrl,
+    keyDerivationPassword,
   };
 }
 
@@ -165,7 +179,7 @@ export const simplePushWithOptionalEncryption = async (params: {
     gitdir,
     keys,
     refs: [{ src: ref, dst: remoteRef, force: false }],
-    remoteUrl: encryptedRemoteUrl,
+    remoteUrl: encryptedRemoteUrl as string,
   });
 };
 
@@ -206,7 +220,7 @@ export const simplePullWithOptionalEncryption = async (
     gitApi,
     gitdir,
     keys,
-    remoteUrl: encryptedRemoteUrl,
+    remoteUrl: encryptedRemoteUrl as string,
   });
 
   const commitId = await getEncryptedRefObjectId({
@@ -261,11 +275,11 @@ export const simpleEncryptedClone = async (
 
   cloneLog('Invoked #zdDigE', { dir, gitdir, url, ref, remoteRef });
 
-  // TODO2 Add `keyDerivationPassword` extraction from URL here
-
-  const { isEncryptedRemote, encryptedRemoteUrl } = getIsEncryptedRemoteUrl(
-    url
-  );
+  const {
+    isEncryptedRemote,
+    encryptedRemoteUrl,
+    keyDerivationPassword,
+  } = getIsEncryptedRemoteUrl(url);
 
   if (!isEncryptedRemote) {
     throw new Error('Remote url without encrypted:: supplied #wWsiGr');
@@ -279,9 +293,8 @@ export const simpleEncryptedClone = async (
     fs,
     http,
     gitdir,
-    encryptedRemoteUrl,
-    // TODO2 Set this to the correct value
-    keyDerivationPassword: '',
+    encryptedRemoteUrl: encryptedRemoteUrl as string,
+    keyDerivationPassword: keyDerivationPassword as string,
     gitApi,
   });
 
