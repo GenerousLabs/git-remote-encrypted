@@ -5,10 +5,7 @@ import {
   FS,
   getEncryptedRefObjectId,
   getKeysFromDisk,
-  GIT_ENCRYPTED_AUTHOR,
-  Keys,
-  KeysBase64,
-  saveKeysToDisk,
+  GIT_ENCRYPTED_AUTHOR
 } from 'git-encrypted';
 import git, { HttpClient } from 'isomorphic-git';
 import { superpathjoin as join } from 'superpathjoin';
