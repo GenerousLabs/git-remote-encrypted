@@ -5,6 +5,12 @@ import { encryptedRepoCommit } from './git';
 import { FS, GitBaseParamsEncrypted } from './types';
 
 const ENCRYPTED_META_FILENAME = 'encrypted.json';
+const CREATE_ENCRYPTED_META_PARAMS = {
+  saltLength: 1024,
+  cpuCost: 1024,
+  blockSize: 8,
+  parallelizationCost: 1
+};
 
 const EncryptedMetaSchema = zod.object({
   version: zod.literal(1),
@@ -27,13 +33,14 @@ const EncryptedMetaSchema = zod.object({
 type EncryptedMeta = zod.infer<typeof EncryptedMetaSchema>;
 
 const createEncryptedMeta = (): EncryptedMeta => {
+  const salt = generateKey(CREATE_ENCRYPTED_META_PARAMS.saltLength);
   return {
     version: 1,
     derivationParams: {
-      salt: generateKey(1024),
-      cpuCost: 1024,
-      blockSize: 8,
-      parallelizationCost: 1,
+      salt: salt,
+      cpuCost: CREATE_ENCRYPTED_META_PARAMS.cpuCost,
+      blockSize: CREATE_ENCRYPTED_META_PARAMS.blockSize,
+      parallelizationCost: CREATE_ENCRYPTED_META_PARAMS.parallelizationCost,
     },
   };
 };
