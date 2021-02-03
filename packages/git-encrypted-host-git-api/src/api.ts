@@ -59,7 +59,10 @@ export const pull: EncryptedPushPull = async ({
   });
 
   if (result.exitCode !== 0) {
-    logPull('git pull failed #nP2w0L', JSON.stringify({ url, result }));
+    logPull(
+      'git pull failed #nP2w0L',
+      JSON.stringify({ url, result, throwOnError })
+    );
     if (throwOnError) {
       throw new Error('External git pull failed #O2TOzC');
     }
