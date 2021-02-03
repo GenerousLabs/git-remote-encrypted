@@ -70,6 +70,13 @@ export const getEncryptedFilePath = ({
   fileType: FileType;
 }) => {
   const dir = getEncryptedFileDir({ gitdir, fileType });
+
+  if (fileType === FileType.object) {
+    const shardedDir = join(dir, encryptedFilename.substr(0, 2));
+    const path = join(shardedDir, encryptedFilename.substr(2));
+    return { dir: shardedDir, path };
+  }
+
   const path = join(dir, encryptedFilename);
   return { dir, path };
 };
