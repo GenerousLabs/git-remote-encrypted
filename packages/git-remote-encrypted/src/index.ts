@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import {
+  createPassword,
   encryptedFetch,
   encryptedInit,
   encryptedPush,
@@ -52,7 +53,7 @@ GitRemoteHelper({
           );
         }
 
-        const keyDerivationPassword = 'foo'; // TODO Generate a random password here
+        const keyDerivationPassword = createPassword();
 
         await git.addRemote({
           fs,
