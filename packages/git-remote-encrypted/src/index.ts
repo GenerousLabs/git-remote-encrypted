@@ -2,13 +2,13 @@
 
 import fs from 'fs';
 import {
+  createPassword,
   encryptedFetch,
   encryptedInit,
   encryptedPush,
   EncryptedPushResult,
   getKeysFromDisk,
   getRefsGitString,
-  createPassword,
 } from 'git-encrypted';
 import { gitApi } from 'git-encrypted-host-git-api';
 import GitRemoteHelper from 'git-remote-helper';
