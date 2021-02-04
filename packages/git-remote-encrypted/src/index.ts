@@ -8,6 +8,7 @@ import {
   EncryptedPushResult,
   getKeysFromDisk,
   getRefsGitString,
+  createPassword,
 } from 'git-encrypted';
 import { gitApi } from 'git-encrypted-host-git-api';
 import GitRemoteHelper from 'git-remote-helper';
@@ -52,7 +53,7 @@ GitRemoteHelper({
           );
         }
 
-        const keyDerivationPassword = 'foo'; // TODO Generate a random password here
+        const keyDerivationPassword = createPassword();
 
         await git.addRemote({
           fs,
