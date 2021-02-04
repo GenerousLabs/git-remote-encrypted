@@ -13,6 +13,7 @@ import { gitApi } from './gitApi';
 import { packageLog } from './packageLog';
 import { getIsEncryptedRemoteUrl } from './utils';
 export { gitApi } from './gitApi';
+export { getIsEncryptedRemoteUrl } from './utils';
 
 type PushOrPullParams = {
   fs: FS;
