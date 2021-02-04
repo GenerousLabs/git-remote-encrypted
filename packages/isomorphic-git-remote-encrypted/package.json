@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "debug": "^4.3.1",
-    "git-encrypted": "^0.4.0",
+    "git-encrypted": "^0.4.1",
     "isomorphic-git": "^1.8.0",
     "superpathjoin": "^2.0.1"
   }
