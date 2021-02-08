@@ -167,7 +167,7 @@ export const copySourceObjectToEncryptedRepo = async (
   });
 };
 
-export const readEnryptedObject = async (
+export const readEncryptedObject = async (
   params: GitBaseOfflineParams & { keys: Keys; objectId: string }
 ) => {
   const { fs, gitdir, objectId, keys } = params;
@@ -217,7 +217,7 @@ export const copyEncryptedObjectToSourceRepo = async (
   params: GitBaseOfflineParams & { keys: Keys; objectId: string }
 ) => {
   const { fs, gitdir } = params;
-  const deflatedWrappedObject = await readEnryptedObject(params);
+  const deflatedWrappedObject = await readEncryptedObject(params);
 
   await writeDeflatedWrappdObjectToSourceRepo({
     fs,
