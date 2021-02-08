@@ -10,6 +10,9 @@
     "frontend",
     "server"
   ],
+  "scripts": {
+    "build": "yarn workspaces run build"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "yarn workspaces run lint"
