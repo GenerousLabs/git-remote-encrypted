@@ -233,21 +233,32 @@ export const copyAllEncryptedObjectsToSourceRepo = async ({
 }: GitBaseOfflineParams & { keys: Keys }) => {
   const encryptedObjectsDir = getEncryptedObjectsDir({ gitdir });
 
-  const encryptedObjectFilenames = await fs.promises.readdir(
+  const encryptedObjectDirectories = await fs.promises.readdir(
     encryptedObjectsDir
   );
 
-  await Bluebird.each(encryptedObjectFilenames, async filename => {
-    const path = join(encryptedObjectsDir, filename);
-    const fileContents = await fs.promises.readFile(path);
-    const deflatedWrappedObject = await decryptFileContentsOnly({
-      fileContents,
-      keys,
-    });
-    await writeDeflatedWrappdObjectToSourceRepo({
-      fs,
-      gitdir,
-      deflatedWrappedObject,
+  await Bluebird.each(encryptedObjectDirectories, async directoryName => {
+    const encryptedObjectDirectoryPath = join(
+      encryptedObjectsDir,
+      directoryName
+    );
+
+    const encryptedObjectFilenames = await fs.promises.readdir(
+      encryptedObjectDirectoryPath
+    );
+
+    await Bluebird.each(encryptedObjectFilenames, async filename => {
+      const path = join(encryptedObjectsDir, directoryName, filename);
+      const fileContents = await fs.promises.readFile(path);
+      const deflatedWrappedObject = await decryptFileContentsOnly({
+        fileContents,
+        keys,
+      });
+      await writeDeflatedWrappdObjectToSourceRepo({
+        fs,
+        gitdir,
+        deflatedWrappedObject,
+      });
     });
   });
 };
